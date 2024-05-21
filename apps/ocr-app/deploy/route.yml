@@ -1,0 +1,20 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+  labels:
+    app: ocr-frontend
+  name: ocr-frontend
+spec:
+  to:
+    kind: Service
+    name: ocr-frontend
+    weight: 100
+  port:
+    targetPort: ocr-frontend
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

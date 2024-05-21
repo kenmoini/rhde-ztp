@@ -1,0 +1,26 @@
+# podman build -t ocr-app-api -f Containerfile.api .
+# podman run --name ocr-app-api --rm -it -p 6969:6969 ocr-app-api
+
+#FROM quay.io/kenmoini/b-sep-fedora-python:latest
+FROM registry.fedoraproject.org/fedora:37
+
+USER 0
+
+RUN dnf update -y \
+ && dnf install wget -y \
+ && wget -O /etc/yum.repos.d/tesseract.repo https://download.opensuse.org/repositories/home:/Alexander_Pozdnyakov:/tesseract5/Fedora_37/home:Alexander_Pozdnyakov:tesseract5.repo \
+ && dnf install -y fswebcam tesseract tesseract-langpack-eng nodejs npm
+
+RUN npm install -g node-webcam \
+ && mkdir -p /opt/app-root/src
+
+COPY ./src /opt/app-root/src
+
+USER 1001
+
+WORKDIR /opt/app-root/src
+
+EXPOSE 6969
+
+#CMD ["nginx", "-g daemon off;"]
+CMD ["node", "/opt/app-root/src/main.js"]

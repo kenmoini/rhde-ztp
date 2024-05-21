@@ -1,0 +1,25 @@
+# podman build -t ocr-app-frontend -f Containerfile.frontend .
+# podman run --name ocr-app-frontend --rm -it -p 8080:8080 ocr-app-frontend
+# podman push ocr-app-frontend quay.io/kenmoini/ocr-app:frontend-latest
+
+#FROM quay.io/kenmoini/b-sep-fedora-python:latest
+FROM registry.fedoraproject.org/fedora:37
+
+USER 0
+
+RUN dnf update -y \
+ && dnf install -y nginx
+
+RUN mkdir -p /opt/app-root/src
+
+COPY ./src /opt/app-root/src
+COPY ./src/nginx.conf /etc/nginx/nginx.conf
+
+USER 1001
+
+WORKDIR /opt/app-root/src
+
+EXPOSE 8080
+
+CMD ["nginx", "-g daemon off;"]
+#CMD ["node", "/opt/app-root/src/main.js"]

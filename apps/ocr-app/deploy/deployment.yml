@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocr-frontend
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+  labels:
+    app: ocr-frontend
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ocr-frontend
+  template:
+    metadata:
+      labels:
+        app: ocr-frontend
+    spec:
+      containers:
+        - name: ocr-frontend
+          imagePullPolicy: Always
+          image: quay.io/kenmoini/ocr-app:frontend-latest
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+              name: ocr-frontend

@@ -1,0 +1,48 @@
+---
+apiVersion: automationcontroller.ansible.com/v1beta1
+kind: AutomationController
+metadata:
+  name: cntrlr
+  namespace: aap
+spec:
+  ee_resource_requirements:
+    limits:
+      cpu: 1000m
+    requests:
+      cpu: 250m
+  create_preload_data: true
+  route_tls_termination_mechanism: Edge
+  garbage_collect_secrets: false
+  loadbalancer_port: 80
+  task_resource_requirements:
+    limits:
+      cpu: 1000m
+    requests:
+      cpu: 250m
+  image_pull_policy: IfNotPresent
+  projects_storage_size: 8Gi
+  admin_email: ken@kenmoini.com
+  task_privileged: false
+  projects_use_existing_claim: _No_
+  projects_storage_class: lvms-vg1-immediate
+  projects_storage_access_mode: ReadWriteOnce
+  projects_persistence: false
+  web_resource_requirements:
+    limits:
+      cpu: 1000m
+    requests:
+      cpu: 250m
+  replicas: 1
+  admin_user: admin
+  loadbalancer_protocol: http
+  nodeport_port: 30080
+  #bundle_cacert_secret: cluster-root-ca-aap2-bundle
+  postgres_keepalives_count: 5
+  postgres_keepalives_idle: 5
+  ingress_type: Route
+  no_log: true
+  auto_upgrade: true
+  postgres_keepalives: true
+  postgres_keepalives_interval: 5
+  ipv6_disabled: false
+  set_self_labels: true

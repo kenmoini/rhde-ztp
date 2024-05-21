@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>OCR App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style type="text/css">
+      #canvas, #player {
+        width:100%;
+        height: 90vh;
+      }
+    </style>
+  </head>
+  
+  <body style="background-color:ghostwhite;">
+    <main class="text-center w-100 m-auto">
+        <div>
+          <video id="player" autoplay playsinline></video>
+        </div>
+        <div>
+          <canvas id="canvas" style="display:none"></canvas>
+        </div>
+        <div class="fixed-bottom py-3 bg-dark">
+          <button class="btn btn-primary btn-lg mx-3" id="capture">Capture</button>
+          <button class="btn btn-secondary btn-lg mx-3" id="flip-button">Switch Camera</button>
+          <button class="btn btn-warning btn-lg mx-3" id="reset">Reset</button>
+          <input type="hidden" id="jobCode" value="123">
+        </div>
+    </main>
+
+    <script src="./config/frontend-connection.js"></script>
+
+    <script>
+      const player = document.getElementById('player');
+      const canvas = document.getElementById('canvas');
+      const context = canvas.getContext('2d');
+      const captureButton = document.getElementById('capture');
+      const resetButton = document.getElementById('reset');
+      const jobCode = document.getElementById('jobCode');
+
+      let front = false;
+      document.getElementById("flip-button").onclick = () => {
+        front = !front;
+        startVideo(handleVideo());
+      };
+
+      function handleVideo(cameraFacing) {
+        const constraints = {
+          audio: false,
+          video: {
+            width: { min: 1024, ideal: 1280, max: 1920 },
+            height: { min: 576, ideal: 720, max: 1080 },
+            facingMode: front ? "user" : "environment",
+          },
+        }
+        return constraints
+      };
+
+      function startVideo(constraints) {
+        navigator.mediaDevices.getUserMedia(constraints)
+          .then((stream) => {
+            player.srcObject = stream
+            player.play()
+        })
+      }
+
+      const recognize = async () => {
+        const worker = await Tesseract.createWorker("eng", 1, {
+          workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@v5.0.0/dist/worker.min.js',
+          langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+          corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@v5.0.0',
+        });
+
+        const ret = await worker.recognize(canvas.toDataURL("image/png"));
+        console.log(canvas.toDataURL("image/png"));
+        // Loop through data
+        console.log(ret.data);
+        for (let i = 0; i < ret.data.lines.length; i++) {
+          textDetected = ret.data.lines[i].text;
+          let result = confirm("Matching text found: " + textDetected + "\nDo you want to use this text?");
+          if (result) {
+            // Do something with the text
+            // For now, just alert it
+            //alert(ret.data.lines[i].text);
+            alert("Sending '" + textDetected.replace(/(\r\n|\n|\r)/gm, "") + "' to service...")
+            jsonData = {
+              jobCode: jobCode,
+              ocrText: textDetected.replace(/(\r\n|\n|\r)/gm, "")
+            }
+
+            var formBody = [];
+            for (var property in details) {
+              var encodedKey = encodeURIComponent(property);
+              var encodedValue = encodeURIComponent(details[property]);
+              formBody.push(encodedKey + "=" + encodedValue);
+            }
+            formBody = formBody.join("&");
+
+            fetch(apiEndpoint + "/api/sendToAnsible", {
+              method: "POST",
+              body: formBody,
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+              }
+            });
+            break;
+          }
+          else {
+            continue;
+          }
+        }
+        //document.getElementById("imgOriginal").src = ret.data.imageColor;
+        //document.getElementById("imgGrey").src = ret.data.imageGrey;
+        //document.getElementById("imgBinary").src = ret.data.imageBinary;
+      }
+
+      if ( navigator.platform != "iPad" && navigator.platform != "iPhone" && navigator.platform != "iPod" ) {
+        canvas.width = window.outerWidth;
+        player.width = window.outerWidth;
+        canvas.height = window.outerHeight;
+        player.height = window.outerHeight;
+      } else {
+        canvas.width = screen.width;
+        player.width = screen.width;
+        canvas.height = screen.height;
+        player.height = screen.height;
+      }
+
+      captureButton.addEventListener('click', () => {
+        // Draw the video frame to the canvas.
+        context.drawImage(player, 0, 0, canvas.width, canvas.height);
+        player.style.display = 'none';
+        canvas.style.display = 'inline-block';
+        recognize();
+      });
+
+      resetButton.addEventListener('click', () => {
+        // Reset the canvas to show the video.
+        player.style.display = 'inline-block';
+        canvas.style.display = 'none';
+      });
+
+      startVideo(handleVideo());
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  </body>
+</html>
