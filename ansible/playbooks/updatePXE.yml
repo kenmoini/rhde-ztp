@@ -1,5 +1,0 @@
----
-- name: Update PXE configuration with a new MAC Address
-  hosts: localhost
-
-  

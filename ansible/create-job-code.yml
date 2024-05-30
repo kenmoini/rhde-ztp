@@ -1,0 +1,39 @@
+- name: Create Job Code Configuration
+  hosts: configserver
+
+  vars:
+    job_code_config_path: /opt/job_code_configs
+    boot_protocol: pxe # redfish | pxe
+    iso_name: ""
+    hostname: ""
+    domain: ""
+    ipv4_address: ""
+    ipv4_gateway: ""
+    ipv4_netmask: ""
+    ipv4_dns:
+      - ""
+    ipv4_dns_search:
+      - ""
+    ssh_public_key: ""
+    root_password: ""
+
+  tasks:
+    - name: Generate Job Code ID and Root Password Hash
+      ansible.builtin.set_fact:
+        job_code: "{{ lookup('password', '/dev/null length=8 chars=ascii_uppercase') }}"
+        root_password_hash: "{{ root_password | password_hash('sha512') }}"
+
+    - name: Template the Job Code Configuration file
+      ansible.builtin.template:
+        src: job_code_config.yml.j2
+        dest: "{{ job_code_config_path }}/{{ job_code }}.yml"
+        mode: 0644
+
+    - name: Return the Job Code ID
+      ansible.builtin.debug:
+        msg: "Job Code ID: {{ job_code }}"
+
+    - name: Pass the Job Code ID to the next playbook in the workflow just in case
+      ansible.builtin.set_stats:
+        data:
+          job_code_id: "{{ job_code }}"
