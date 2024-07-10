@@ -2,7 +2,8 @@
 # podman push jobcode-api quay.io/kenmoini/jobcode-api:latest
 # podman run --name jobcode-api --rm -it -p 8675:8675 -v /opt/isos:/opt/isos -v /opt/job-codes:/opt/job-codes jobcode-api
 
-FROM registry.fedoraproject.org/fedora:37
+#FROM registry.fedoraproject.org/fedora:37
+FROM quay.io/kenmoini/job-code-base:latest
 
 ENV FLASK_RUN_PORT=8675
 ENV FLASK_RUN_HOST=0.0.0.0
@@ -14,13 +15,8 @@ ENV JOB_CODE_PATH=/opt/job-codes
 
 USER 0
 
-COPY ./src /opt/app-root/src
 WORKDIR /opt/app-root/src
-
-RUN dnf update -y \
- && dnf install -y python3 python3-pip \
- && mkdir -p /opt/app-root/src \
- && pip3 install -r /opt/app-root/src/requirements.txt
+COPY ./src /opt/app-root/src
 
 USER 1001
 

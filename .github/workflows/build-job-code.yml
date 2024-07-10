@@ -4,7 +4,9 @@ on:
     branches:
       - main
     paths:
-      - apps/job-code-app/**
+      - apps/job-code-app/src/**
+      - apps/job-code-app/Containerfile.api
+      - apps/job-code-app/Containerfile.web
       - .github/workflows/build-job-code.yml
 
   # Schedule workflow run at 00:00 on Sunday
@@ -19,7 +21,7 @@ jobs:
   build-api-container:
     name: Build API Container
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
 
     - name: Check out code
@@ -73,7 +75,7 @@ jobs:
   build-web-container:
     name: Build Web Container
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
 
     - name: Check out code
