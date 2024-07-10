@@ -24,8 +24,6 @@ jobs:
 
     - name: Check out code
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -59,7 +57,7 @@ jobs:
         password: "${{ secrets.REGISTRY_TOKEN }}"
 
     - name: Build and push
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./apps/job-code-app/
         file: ./apps/job-code-app/Containerfile.api
@@ -79,8 +77,6 @@ jobs:
 
     - name: Check out code
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -114,7 +110,7 @@ jobs:
         password: "${{ secrets.REGISTRY_TOKEN }}"
 
     - name: Build and push
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./apps/job-code-app/
         file: ./apps/job-code-app/Containerfile.web
