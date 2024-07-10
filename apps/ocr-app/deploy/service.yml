@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: ocr-frontend
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "10"
   labels:
     app: ocr-frontend
 spec:

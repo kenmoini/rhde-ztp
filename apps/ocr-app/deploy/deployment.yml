@@ -33,3 +33,13 @@ spec:
             - containerPort: 8080
               protocol: TCP
               name: ocr-frontend
+          volumeMounts:
+            - mountPath: /opt/app-root/src/config
+              name: ocr-app-config
+      volumes:
+        - name: ocr-app-config
+          configMap: 
+            name: ocr-app-config
+            items:
+              - key: frontend-connection.js
+                path: frontend-connection.js
