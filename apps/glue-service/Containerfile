@@ -1,0 +1,24 @@
+# podman build -t fdo-ansible-glue-service -f Containerfile .
+# podman push fdo-ansible-glue-service quay.io/kenmoini/fdo-ansible-glue-service:latest
+# podman run --name fdo-ansible-glue-service --rm -it -p 8765:8765 -v /opt/job-codes:/opt/job-codes fdo-ansible-glue-service
+
+#FROM registry.fedoraproject.org/fedora:37
+FROM quay.io/kenmoini/job-code-base:latest
+
+ENV FLASK_RUN_PORT=8675
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASH_TLS_CERT=
+ENV FLASH_TLS_KEY=
+
+ENV JOB_CODE_PATH=/opt/job-codes
+
+USER 0
+
+WORKDIR /opt/app-root/src
+COPY ./src /opt/app-root/src
+
+USER 1001
+
+EXPOSE 8765
+
+CMD ["/opt/app-root/src/start-api.sh"]
