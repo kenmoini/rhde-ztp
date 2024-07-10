@@ -88,7 +88,7 @@ def listClaimedJobCodesRoute():
         runJobTemplate = requests.post(aapControllerURL + "/api/v2/job_templates/" + aapJobTemplateID + "/launch/",
                                         headers={"Authorization": "Bearer " + aapControllerToken},
                                         json={"limit": jobCodeInfo["hostname"],
-                                              "extra_vars": {"provisioned_ip_address": provisionedIPAddress,
+                                              "extra_vars": json.dumps({"provisioned_ip_address": provisionedIPAddress,
                                                            "default_device": default_device,
                                                            "ipv4_address": jobCodeInfo["ipv4_address"],
                                                            "ipv4_gateway": jobCodeInfo["ipv4_gateway"],
@@ -98,7 +98,7 @@ def listClaimedJobCodesRoute():
                                                            "hostname": jobCodeInfo["hostname"],
                                                            "domain": jobCodeInfo["domain"],
                                                            "job_code": jobCodeInfo["job_code"],
-                                                           "submitted_date": submittedDate}}, verify=False)
+                                                           "submitted_date": submittedDate})}, verify=False)
         # Check the status of the job launch
         if runJobTemplate.status_code != 201:
             return json.dumps({"error": "Error launching job in AAP2 Controller"})
