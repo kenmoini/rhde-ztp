@@ -59,7 +59,7 @@ jobs:
         password: "${{ secrets.REGISTRY_TOKEN }}"
 
     - name: Build and push
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./apps/job-code-app/
         file: ./apps/job-code-app/Containerfile.api
@@ -114,7 +114,7 @@ jobs:
         password: "${{ secrets.REGISTRY_TOKEN }}"
 
     - name: Build and push
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./apps/job-code-app/
         file: ./apps/job-code-app/Containerfile.web
