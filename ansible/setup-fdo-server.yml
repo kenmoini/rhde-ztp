@@ -1,0 +1,173 @@
+---
+# https://github.com/osbuild/rhel-for-edge-demo/tree/master/fdo
+# https://www.youtube.com/watch?v=_nq5IAVbl2Y
+# https://github.com/fdo-rs/fido-device-onboard-rs/blob/main/HOWTO.md
+- name: Setup FDO AIO
+  hosts: fdoserver
+  become: yes
+
+  vars:
+    install_packages:
+      - cockpit
+      - cockpit-storaged
+      - fdo-admin-cli
+      - jq
+      - nano
+
+  tasks:
+  - name: Update packages
+    ansible.builtin.dnf:
+      update_cache: yes
+      name: '*'
+      state: latest
+
+  - name: Install needed packages
+    ansible.builtin.dnf:
+      state: present
+      name: "{{ install_packages }}"
+
+  - name: Start the cockpit service
+    ansible.builtin.systemd:
+      name: cockpit.socket
+      state: started
+      enabled: yes
+
+  - name: Start the FDO service
+    ansible.builtin.systemd:
+      name: fdo-aio.service
+      state: started
+      enabled: yes
+
+  - name: Open firewall ports for cockpit
+    ansible.builtin.firewalld:
+      service: cockpit
+      state: enabled
+      permanent: yes
+      immediate: yes
+
+  - name: Open firewall ports for FDO
+    ansible.builtin.firewalld:
+      port: 8080-8083/tcp
+      state: enabled
+      permanent: yes
+      immediate: yes
+
+  - name: Wait 10s for FDO AIO to initialize
+    ansible.builtin.pause:
+      seconds: 10
+
+  - name: Make directory for FDO configuration
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      owner: root
+      group: root
+      mode: '0755'
+    loop:
+      - /etc/fdo-device/cfg/etc/glue
+      - /etc/fdo-device/cfg/etc/modprobe.d
+      - /etc/fdo-device/cfg/etc/systemd/system
+
+  - name: Copy over files for FDO configuration
+    ansible.builtin.copy:
+      src: "files/fdo/{{ item }}"
+      dest: /etc/fdo-device/cfg/{{ item }}
+      owner: root
+      group: root
+      mode: '0644'
+    loop:
+      - etc/glue/init.sh
+      - etc/rpm-ostreed.conf
+      - etc/modprobe.d/nouveau-denylist.conf
+      - etc/systemd/system/applyupdate.service
+      - etc/systemd/system/applyupdate.timer
+      - etc/systemd/system/fdo-ansible-glue.service
+
+  - name: Read in the /etc/fdo/aio/configs/serviceinfo_api_server.yml file
+    ansible.builtin.slurp:
+      src: /etc/fdo/aio/configs/serviceinfo_api_server.yml
+    register: serviceinfo_api_server_config
+
+  - name: Set the decoded data to a YAML fact
+    ansible.builtin.set_fact:
+      serviceinfo_api_server_config: "{{ serviceinfo_api_server_config.content | b64decode | from_yaml }}"
+
+  - name: Debug
+    ansible.builtin.debug:
+      var: serviceinfo_api_server_config
+
+  - name: Change some configuration values
+    ansible.builtin.set_fact:
+      new_serviceinfo_api_server_config:
+        service_info:
+          after_onboarding_reboot: true
+          initial_user:
+            username: ansible
+            password: password123
+            sshkeys:
+              - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB MasterKemoKey"
+          files:
+            - path: /etc/glue/init.sh
+              permissions: 755
+              source_path: /etc/fdo-device/cfg/etc/glue/init.sh
+            - path: /etc/rpm-ostreed.conf
+              permissions: 644
+              source_path: /etc/fdo-device/cfg/etc/rpm-ostreed.conf 
+            - path: /etc/modprobe.d/nouveau-denylist.conf
+              permissions: 644
+              source_path: /etc/fdo-device/cfg/etc/modprobe.d/nouveau-denylist.conf
+            - path: /etc/systemd/system/applyupdate.service
+              permissions: 644
+              source_path: /etc/fdo-device/cfg/etc/systemd/system/applyupdate.service
+            - path: /etc/systemd/system/fdo-ansible-glue.service
+              permissions: 644
+              source_path: /etc/fdo-device/cfg/etc/systemd/system/glue.service
+            - path: /etc/systemd/system/applyupdate.timer
+              permissions: 644
+              source_path: /etc/fdo-device/cfg/etc/systemd/system/applyupdate.timer
+          commands:
+            - command: usermod
+              args:
+                - -a
+                - -G
+                - wheel
+                - ansible
+            - command: systemctl
+              args:
+                - daemon-reload
+            - command: systemctl
+              args:
+                - enable
+                - --now
+                - rpm-ostreed-automatic.timer
+                - applyupdate.timer
+                - openssh-server.service
+                - glue.service
+            - command: rpm-ostree
+              args:
+                - kargs
+                - --append=console=tty0
+                - --append=console=ttyS0,115200
+                - --append=modprobe.blacklist=nouveau
+
+  - name: Merge the YAML data
+    ansible.builtin.set_fact:
+      serviceinfo_api_server_config: "{{ serviceinfo_api_server_config | combine(new_serviceinfo_api_server_config) }}"
+
+  - name: Debug
+    ansible.builtin.debug:
+      var: serviceinfo_api_server_config
+
+  - name: Write the new configuration to the file
+    ansible.builtin.copy:
+      content: "{{ serviceinfo_api_server_config | to_nice_yaml }}"
+      dest: /etc/fdo/aio/configs/serviceinfo_api_server.yml
+      owner: root
+      group: root
+      mode: '0644'
+      backup: yes
+
+  - name: Restart the FDO service
+    ansible.builtin.systemd:
+      name: fdo-aio.service
+      state: restarted

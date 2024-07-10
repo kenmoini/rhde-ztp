@@ -1,0 +1,39 @@
+dns:
+  # Base domain of the cluster. All managed DNS records will be sub-domains of this base.
+  baseDomain: {{ microshift_base_domain }}
+
+network:
+  clusterNetwork:
+  # IP range for use by the cluster
+{% for cidr in microshift_config.network.clusterNetworkCIDRs %}
+    - cidr: {{ cidr }}
+{% endfor %}
+  serviceNetwork:
+  # IP range for services in the cluster
+{% for svcNet in microshift_config.network.serviceNetwork %}
+    - {{ svcNet }}
+{% endfor %}
+  # Node ports allowed for services
+  serviceNodePortRange: {{ microshift_config.network.serviceNodePortRange }}
+
+node:
+  # If non-empty, use this string to identify the node instead of the hostname
+  hostnameOverride: ""
+  # IP address of the node, passed to the kubelet.
+  # If not specified, kubelet will use the node's default IP address.
+  nodeIP: ""
+
+apiServer:
+  # The Subject Alternative Names for the external certificates in API server (defaults to hostname -A)
+  subjectAltNames:
+{% for san in microshift_config.apiServer.subjectAltNames %}
+    - {{ san }}
+{% endfor %}
+
+debugging:
+  # Log verbosity ('Normal', 'Debug', 'Trace', 'TraceAll'):
+  logLevel: "Normal"
+
+etcd:
+  # Memory limit for etcd, in Megabytes: 0 is no limit.
+  memoryLimitMB: 0

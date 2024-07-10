@@ -1,0 +1,125 @@
+---
+- name: Post-bootstrap Configuration of RHDE Nodes
+  hosts: all
+
+  vars:
+    pull_secret: "json_here" # from Ansible Vault
+
+    microshift_hostname: "{{ inventory_hostname }}"
+    microshift_base_domain: rhde.local
+
+    microshift_config:
+      network:
+        clusterNetworkCIDRs:
+          - 10.42.0.0/16
+        serviceNetwork:
+          - 10.43.0.0/16
+        serviceNodePortRange: 30000-32767
+      apiServer:
+        subjectAltNames:
+          - api.{{ microshift_hostname }}.{{ microshift_base_domain }}
+
+    tasks:
+
+      - name: Create the crio directory
+        ansible.builtin.file:
+          path: /etc/crio
+          state: directory
+          owner: root
+          group: root
+          mode: 0755
+
+      - name: Create the Pull Secret
+        ansible.builtin.copy:
+          content: "{{ pull_secret }}"
+          dest: /etc/crio/openshift-pull-secret
+          mode: 0600
+          owner: root
+          group: root
+
+      - name: Template the microshift config
+        ansible.builtin.template:
+          src: templates/microshift-config.yml.j2
+          dest: /etc/microshift/config.yaml
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Enable pod network access via firewalld
+        ansible.posix.firewalld:
+          #source: 192.0.2.0/24
+          source: "{{ item }}"
+          zone: trusted
+          state: enabled
+          permanent: true
+          immediate: true
+        loop: "{{ microshift_config.network.clusterNetworkCIDRs }}"
+
+      - name: Enable local network access via firewalld
+        ansible.posix.firewalld:
+          source: 169.254.169.1
+          zone: trusted
+          state: enabled
+          permanent: true
+          immediate: true
+
+      - name: Enable external access to the API, HTTP, and HTTPS ports
+        ansible.posix.firewalld:
+          port: "{{ item }}"
+          zone: trusted
+          state: enabled
+          permanent: true
+          immediate: true
+        loop:
+          - 6443/tcp
+          - 80/tcp
+          - 443/tcp
+
+      - name: Enable external access to the API, HTTP, and HTTPS ports
+        ansible.posix.firewalld:
+          port: "{{ item }}"
+          zone: public
+          state: enabled
+          permanent: true
+          immediate: true
+        loop:
+          - 6443/tcp
+          - 80/tcp
+          - 443/tcp
+
+      - name: Enable and set the Microshift service state
+        ansible.builtin.systemd:
+          name: microshift
+          enabled: true
+          state: "{{ microshift_state }}"
+
+      - name: Make a .kube folder
+        ansible.builtin.file:
+          path: "{{ ansible_env.HOME }}/.kube"
+          state: directory
+          owner: "{{ ansible_env.USER }}"
+          group: "{{ ansible_env.USER }}"
+          mode: 0755
+
+      - name: Copy over the kubeconfig file
+        ansible.builtin.copy:
+          remote_src: true
+          src: /var/lib/microshift/resources/kubeadmin/kubeconfig
+          dest: "{{ ansible_env.HOME }}/.kube/config"
+          owner: "{{ ansible_env.USER }}"
+          group: "{{ ansible_env.USER }}"
+          mode: 0600
+
+      - name: Copy over the remote kubeconfig file
+        ansible.builtin.copy:
+          remote_src: true
+          src: /var/lib/microshift/resources/kubeadmin/api.{{ microshift_hostname }}.{{ microshift_base_domain }}/kubeconfig
+          dest: "{{ ansible_env.HOME }}/.kube/remote-config"
+          owner: "{{ ansible_env.USER }}"
+          group: "{{ ansible_env.USER }}"
+          mode: 0600
+
+      - name: Disable the Glue Service
+        ansible.builtin.systemd:
+          name: fdo-ansible-glue
+          enabled: false
