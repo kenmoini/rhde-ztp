@@ -1,6 +1,6 @@
 # podman build -t ocr-app-frontend -f Containerfile.frontend .
-# podman run --name ocr-app-frontend --rm -it -p 8080:8080 ocr-app-frontend
 # podman push ocr-app-frontend quay.io/kenmoini/ocr-app:frontend-latest
+# podman run --name ocr-app-frontend --rm -it -p 8080:8080 ocr-app-frontend
 
 #FROM quay.io/kenmoini/b-sep-fedora-python:latest
 FROM registry.fedoraproject.org/fedora:37
