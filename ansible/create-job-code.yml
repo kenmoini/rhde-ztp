@@ -2,7 +2,7 @@
   hosts: configserver
 
   vars:
-    job_code_config_path: /opt/job_code_configs
+    job_code_config_path: /opt/job-codes
     boot_protocol: pxe # redfish | pxe
     iso_name: ""
     hostname: ""
@@ -20,7 +20,7 @@
   tasks:
     - name: Generate Job Code ID and Root Password Hash
       ansible.builtin.set_fact:
-        job_code: "{{ lookup('password', '/dev/null length=8 chars=ascii_uppercase') }}"
+        job_code: "{{ lookup('password', '/dev/null length=4 chars=ascii_uppercase') }}"
         root_password_hash: "{{ root_password | password_hash('sha512') }}"
 
     - name: Template the Job Code Configuration file
