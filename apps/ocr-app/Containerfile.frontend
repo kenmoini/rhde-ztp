@@ -7,8 +7,8 @@ FROM registry.fedoraproject.org/fedora:37
 
 USER 0
 
-RUN dnf update -y \
- && dnf install -y nginx
+RUN dnf update -y --disablerepo=fedora-cisco-openh264 \
+ && dnf install -y nginx --disablerepo=fedora-cisco-openh264
 
 RUN mkdir -p /opt/app-root/src
 
