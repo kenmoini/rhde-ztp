@@ -1,0 +1,126 @@
+name: Build App Container - Job Code
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/job-code-app/**
+      - .github/workflows/build-job-code.yml
+
+  # Schedule workflow run at 00:00 on Sunday
+  schedule:
+    - cron: '0 2 * * 0'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  # Build the API container
+  build-api-container:
+    name: Build API Container
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64,amd64
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          quay.io/kenmoini/job-code-api
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=tag
+          type=sha,prefix=,suffix=,format=short
+          type=sha,prefix=,suffix=,format=long
+          type=raw,value=latest
+
+    - name: Login to Quay Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: quay.io
+        username: "${{ secrets.REGISTRY_USERNAME }}"
+        password: "${{ secrets.REGISTRY_TOKEN }}"
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: ./apps/job-code-app/
+        file: ./apps/job-code-app/Containerfile.api
+        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ steps.meta.outputs.tags }}
+        push: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64, linux/arm64
+
+  # Build the Web UI container
+  build-web-container:
+    name: Build Web Container
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64,amd64
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          quay.io/kenmoini/job-code-web
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=tag
+          type=sha,prefix=,suffix=,format=short
+          type=sha,prefix=,suffix=,format=long
+          type=raw,value=latest
+
+    - name: Login to Quay Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: quay.io
+        username: "${{ secrets.REGISTRY_USERNAME }}"
+        password: "${{ secrets.REGISTRY_TOKEN }}"
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: ./apps/job-code-app/
+        file: ./apps/job-code-app/Containerfile.web
+        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ steps.meta.outputs.tags }}
+        push: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64, linux/arm64

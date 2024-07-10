@@ -1,0 +1,29 @@
+# podman build -t jobcode-api -f Containerfile.api .
+# podman push jobcode-api quay.io/kenmoini/jobcode-api:latest
+# podman run --name jobcode-api --rm -it -p 8675:8675 -v /opt/isos:/opt/isos -v /opt/job-codes:/opt/job-codes jobcode-api
+
+FROM registry.fedoraproject.org/fedora:37
+
+ENV FLASK_RUN_PORT=8675
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASH_TLS_CERT=
+ENV FLASH_TLS_KEY=
+
+ENV ISO_PATH=/opt/isos
+ENV JOB_CODE_PATH=/opt/job-codes
+
+USER 0
+
+RUN dnf update -y \
+ && dnf install -y python3 python3-pip \
+ && mkdir -p /opt/app-root/src
+
+COPY ./src /opt/app-root/src
+
+USER 1001
+
+WORKDIR /opt/app-root/src
+
+EXPOSE 8675
+
+CMD ["/opt/app-root/src/start-api.sh"]

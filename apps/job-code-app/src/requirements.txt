@@ -1,0 +1,6 @@
+streamlit
+streamlit_extras
+Flask
+flask_cors
+pandas
+passlib
