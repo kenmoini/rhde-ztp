@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - apps/job-code-app/Containerfile.base
+      - apps/job-code-app/src/requirements.txt
       - .github/workflows/build-job-code-base.yml
 
   # Schedule workflow run at 00:00 on Sunday
