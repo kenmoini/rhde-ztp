@@ -12,6 +12,8 @@ USER 0
 WORKDIR /opt/app-root/src
 COPY ./src /opt/app-root/src
 
+RUN chmod a+x /opt/app-root/src/start-web.sh
+
 USER 1001
 
 EXPOSE 8501
