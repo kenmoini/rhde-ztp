@@ -1,0 +1,31 @@
+# podman build -t unified-api -f Containerfile .
+# podman push unified-api quay.io/kenmoini/unified-api:latest
+# podman run --name unified-api --rm -it -p 9876:9876 -v /opt/isos:/opt/isos -v /opt/job-codes:/opt/job-codes unified-api
+
+#FROM registry.fedoraproject.org/fedora:37
+FROM quay.io/kenmoini/job-code-base:latest
+
+ENV FLASK_RUN_PORT=9876
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASH_TLS_CERT=
+ENV FLASH_TLS_KEY=
+
+ENV ISO_PATH=/opt/isos
+ENV JOB_CODE_PATH=/opt/job-codes
+
+ENV AAP_CONTROLLER_URL=
+ENV AAP_CONTROLLER_TOKEN=
+ENV AAP_UPDATE_PXE_JOB_TEMPLATE_ID=
+ENV AAP_GLUE_JOB_TEMPLATE_ID=
+ENV AAP_GLUE_INVENTORY_ID=
+
+USER 0
+
+WORKDIR /opt/app-root/src
+COPY ./src /opt/app-root/src
+
+USER 1001
+
+EXPOSE 9876
+
+CMD ["/opt/app-root/src/start-api.sh"]
