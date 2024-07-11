@@ -17061,7 +17061,175 @@ var __Html5QrcodeLibrary__;
             (function (t) {
                 (t[(t.SCAN_TYPE_CAMERA = 1)] = "SCAN_TYPE_CAMERA"), (t[(t.SCAN_TYPE_FILE = 2)] = "SCAN_TYPE_FILE");
             })(e || (e = {}));
-        
+        var i = -1 !== location.host.indexOf("127.0.0.1"),
+            o = (function () {
+                function t() {}
+                return (
+                    (t.logScanStart = function (t, e) {
+                        //gtag("event", "ScanStart", { event_category: e, event_label: "embed=".concat(t) });
+                    }),
+                    (t.logScanRestart = function () {
+                        //gtag("event", "ScanStart", { event_category: "Restart", event_label: "NA" }), gtag("event", "ScanRestart", { event_category: "Restart", event_label: "NA" });
+                    }),
+                    (t.logScanSuccess = function (t, e) {
+                        //gtag("event", "ScanSuccess", { event_category: t, event_label: e });
+                        var r = "ScanSuccess_".concat(t);
+                        //gtag("event", r, { event_category: "codeType", event_label: "NA" });
+                    }),
+                    (t.logActionCopy = function () {
+                        //gtag("event", "Action-Copy", {});
+                    }),
+                    (t.logActionShare = function () {
+                        //gtag("event", "Action-Share", {}), gtag("event", "share", {});
+                    }),
+                    (t.logActionDownload = function () {
+                        //gtag("event", "Action-Download", {});
+                    }),
+                    (t.logPaymentAction = function () {
+                        //gtag("event", "Action-Payment", {});
+                    }),
+                    (t.logUrlAction = function (t) {
+                        // gtag("event", "Action-Url", {
+                        //     event_callback: function () {
+                        //         t();
+                        //     },
+                        // });
+                    }),
+                    (t.logAntiEmbedWindowShown = function () {
+                        // gtag("event", "Anti-Embed-Window", {});
+                    }),
+                    (t.logAntiEmbedActionNavigateToScanApp = function (t) {
+                        // gtag("event", "Anti-Embed-Action", {
+                        //     event_category: "NavigateToScanapp",
+                        //     event_callback: function () {
+                        //         t();
+                        //     },
+                        // });
+                    }),
+                    (t.logAntiEmbedActionContinueHere = function (t) {
+                        // gtag("event", "Anti-Embed-Action", {
+                        //     event_category: "Continue",
+                        //     event_callback: function () {
+                        //         t();
+                        //     },
+                        // });
+                    }),
+                    (t.logDisplayMode = function (t) {
+                        // gtag("event", "DisplayMode_".concat(t), {});
+                    }),
+                    (t.logA2hsPopupShown = function () {
+                        // gtag("event", "A2hs-popup-shown", {});
+                    }),
+                    (t.logA2hsAddButtonClicked = function (t) {
+                        // gtag("event", "A2hs-add-button-clicked", { event_label: !0 === t ? "true" : "false" });
+                    }),
+                    (t.logA2hsCancelButtonClicked = function (t) {
+                        // gtag("event", "A2hs-cancel-button-clicked", { event_label: !0 === t ? "true" : "false" });
+                    }),
+                    (t.logA2hsBrowserPromptShown = function () {
+                        // gtag("event", "A2hs-browser-prompt-shown", {});
+                    }),
+                    (t.logA2hsDone = function () {
+                        // gtag("event", "A2hs-done", {});
+                    }),
+                    (t.logA2hsBrowserPromptCancelled = function () {
+                        // gtag("event", "A2hs-browser-prompt-cancelled", {});
+                    }),
+                    (t.logFtpBacklinkClick = function (t) {
+                        // gtag("event", "Ftp-Backlink-Action", {
+                        //     event_callback: function () {
+                        //         t();
+                        //     },
+                        // });
+                    }),
+                    (t.logAboutMenuButtonOpenClick = function () {
+                        gtag("event", "MobileNavBar_AboutButton_OpenClick", {});
+                    }),
+                    (t.logAboutMenuButtonCloseClick = function () {
+                        gtag("event", "MobileNavBar_AboutButton_CloseClick", {});
+                    }),
+                    (t.logAboutBottomSheetButtonCloseClick = function () {
+                        gtag("event", "MobileNavBar_AboutBottomSheet_CloseButtonClick", {});
+                    }),
+                    (t.logAboutBottomSheetCloseFromOutside = function () {
+                        gtag("event", "MobileNavBar_AboutuBottomSheet_CloseFromOutside", {});
+                    }),
+                    (t.logHistoryMenuButtonOpenClick = function () {
+                        gtag("event", "MobileNavBar_HistoryButton_OpenClick", {});
+                    }),
+                    (t.logHistoryMenuButtonCloseClick = function () {
+                        gtag("event", "MobileNavBar_HistoryButton_CloseClick", {});
+                    }),
+                    (t.logHistoryBottomSheetCloseButtonClick = function () {
+                        gtag("event", "MobileNavBar_HistoryBottomSheet_CloseButtonClick", {});
+                    }),
+                    (t.logHistoryBottomSheetCloseFromOutside = function () {
+                        gtag("event", "MobileNavBar_HistoryBottomSheet_CloseFromOutside", {});
+                    }),
+                    (t.logSponsorMenuButtonOpenClick = function () {
+                        gtag("event", "MobileNavBar_SponsorButton_OpenClick", {});
+                    }),
+                    (t.logSponsorMenuButtonCloseClick = function () {
+                        gtag("event", "MobileNavBar_SponsorButton_CloseClick", {});
+                    }),
+                    (t.logSponsorBottomSheetCloseButtonClick = function () {
+                        gtag("event", "MobileNavBar_SponsorBottomSheet_CloseButtonClick", {});
+                    }),
+                    (t.logSponsorBottomSheetCloseFromOutside = function () {
+                        gtag("event", "MobileNavBar_SponsorBottomSheet_CloseFromOutside", {});
+                    }),
+                    (t.logUrlQuickActionClick = function () {
+                        gtag("event", "QuickAction_Url_Click", {});
+                    }),
+                    t
+                );
+            })(),
+            s = (function () {
+                function t() {
+                    (this.doNotShowKey = "PWA-DO-NOT-SHOW-RPOMPT"), (this.doNotShowValue = "true"), (this.doNotShowPwaPrompt = localStorage.getItem(this.doNotShowKey) === this.doNotShowValue);
+                }
+                return (
+                    (t.prototype.setNeverShowPrompt = function () {
+                        localStorage.setItem(this.doNotShowKey, this.doNotShowValue), (this.doNotShowPwaPrompt = !0);
+                    }),
+                    (t.prototype.shouldShowPrompt = function () {
+                        return !this.doNotShowPwaPrompt;
+                    }),
+                    t
+                );
+            })(),
+            a = (function () {
+                function t() {
+                    var t = this;
+                    (this.pwaHistoryManager = new s()),
+                        (this.countShownInSession = 0),
+                        window.addEventListener("beforeinstallprompt", function (e) {
+                            e.preventDefault(), (t.deferredPrompt = e), console.log("Deferred installation prompt.");
+                        });
+                }
+                return (
+                    (t.prototype.showPWAInstallPrompt = function () {
+                        var t = this;
+                        this.deferredPrompt &&
+                            (this.countShownInSession++,
+                            this.deferredPrompt.prompt(),
+                            this.deferredPrompt.userChoice.then(function (e) {
+                                o.logA2hsBrowserPromptShown(), "accepted" === e.outcome ? o.logA2hsDone() : o.logA2hsBrowserPromptCancelled(), (t.deferredPrompt = void 0);
+                            }));
+                    }),
+                    (t.prototype.showPrompt = function () {
+                        this.showPWAInstallPrompt();
+                    }),
+                    (t.prototype.optionallyShowPrompt = function () {
+                        var t = this;
+                        if (!(this.countShownInSession > 0) && this.deferredPrompt && !this.pwaHistoryManager.shouldShowPrompt())
+                            return setTimeout(function () {
+                                t.showPrompt();
+                            }, 1e3);
+                    }),
+                    t
+                );
+            })();
         function c(t) {
             return p(t) ? (-1 === t.indexOf("http://") && -1 === t.indexOf("https://") ? "http://".concat(t) : t) : (console.error("Invalid url - ".concat(t)), t);
         }
@@ -20645,6 +20813,7 @@ var __Html5QrcodeLibrary__;
             Ft = (function () {
                 function t(t) {
                     var e = this;
+                    (this.pwaPromptManagerGlobal = new a()),
                         (this.listOfHidableUiComponents = []),
                         (this.isFormFactorMobile = t),
                         (this.qrResultViewer = new R(t)),
@@ -20785,10 +20954,10 @@ var __Html5QrcodeLibrary__;
                 })();
         }),
             "complete" === document.readyState || "interactive" === document.readyState ? setTimeout(vt, 1) : document.addEventListener("DOMContentLoaded", vt),
-            "serviceWorker" in navigator &&
-                navigator.serviceWorker.register("/sw.js").then(function () {
-                    i && console.log("Service Worker Registered");
-                }),
+            // "serviceWorker" in navigator &&
+            //     navigator.serviceWorker.register("/sw.js").then(function () {
+            //         i && console.log("Service Worker Registered");
+            //     }),
             window.addEventListener("DOMContentLoaded", function () {
                 var t = "Browser_tab";
                 window.matchMedia("(display-mode: standalone)").matches && (t = "PWA_standalone"), i ? console.log("DISPLAY_MODE_LAUNCH:", t) : o.logDisplayMode(t);
