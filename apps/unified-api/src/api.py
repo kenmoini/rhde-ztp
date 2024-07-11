@@ -119,7 +119,7 @@ def createJobCodeRoute():
 # Reads in the associated Job Code ID data, sends it to Ansible to reconfigure the PXE server
 # Returns the Job Code data and the Job Code Claim data
 @app.route("/createJobCodeClaim", methods = ['POST'])
-def createJobCodeRoute():
+def createJobCodeClaimRoute():
     if request.method == 'POST':
         # Get the JSON data from the request
         inputData = request.json
