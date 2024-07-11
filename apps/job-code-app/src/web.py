@@ -14,12 +14,12 @@ isoFiles = []
 # Get the list of job codes and ISOs from the API
 if backendAPI != "":
     # Get the list of ISO files
-    isoFiles = requests.get(backendAPI + "/listISOs").json()
+    isoFiles = requests.get(backendAPI + "/listISOs", verify=False).json()
     if isoFiles == "":
         isoFiles = ["rhde-old.iso", "rhde.iso", "rhde-next.iso"]
 
     # Get the list of job codes
-    jobCodes = requests.get(backendAPI + "/listJobCodes").json()
+    jobCodes = requests.get(backendAPI + "/listJobCodes", verify=False).json()
     if jobCodes == "":
         jobCodes = {
             "job_code": ["ABC", "DEF", "GHI"],
@@ -95,7 +95,7 @@ with tab2:
 
 # Refresh Job Code List
 if refresh_button:
-    jobCodes = requests.get(backendAPI + "/listJobCodes").json()
+    jobCodes = requests.get(backendAPI + "/listJobCodes", verify=False).json()
 
 if submit_button:
     with st.spinner("Processing Job Code..."):
@@ -136,12 +136,12 @@ if submit_button:
                 "root_password": root_password_hash
             }
         }
-        response = requests.post(backendAPI + "/createJobCode", json=job_code_data)
+        response = requests.post(backendAPI + "/createJobCode", json=job_code_data, verify=False)
         container_output = st.empty()
         # print out the job code
         # Make sure the response was successful
         if response.status_code == 200:
             container_output.write("Job Code " + job_code + " Created Successfully!")
-            jobCodes = requests.get(backendAPI + "/listJobCodes").json()
+            jobCodes = requests.get(backendAPI + "/listJobCodes", verify=False).json()
         else:
             container_output.write("Error Creating Job Code")
