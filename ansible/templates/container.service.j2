@@ -1,0 +1,23 @@
+[Service]
+Restart=always
+#ExecStartPre=-/bin/mkdir -p /opt/appdata/boinc/slots
+#ExecStartPre=-/bin/mkdir -p /opt/appdata/boinc/locale
+
+[Container]
+ContainerName={{ name }}
+Image={{ image }}
+Label="io.containers.autoupdate=image"
+Network=host
+{% for port in ports %}
+PublishPort={{ port }}:{{ port }}
+{% endfor %}
+{% for volume in volumes %}
+Volume={{ volume }}
+{% endfor %}
+{% for env in envs %}
+Environment={{ env }}
+{% endfor %}
+Timezone=local
+
+[Install]
+WantedBy=default.target

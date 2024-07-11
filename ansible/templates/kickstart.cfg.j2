@@ -1,0 +1,31 @@
+#version=RHEL9
+#arch=amd64
+
+# General
+reboot
+text
+skipx
+firstboot --disable
+eula --agreed
+
+bootloader --append="rhgb quiet crashkernel=auto modprobe.blacklist=nouveau"
+
+# Networking
+network --hostname=avalon.kemo.labs
+
+# Do not configure the base interfaces if you're setting up a bridge or bond and things
+#network --device=enP2s1f3np0 --no-activate
+network --bootproto=static --device=enp1s0 --gateway=192.168.42.1 --ip=192.168.42.99 --nameserver=192.168.42.9,192.168.42.10 --netmask=255.255.255.0 --noipv6 --activate
+
+# Partitioning
+# https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/performing_an_advanced_rhel_9_installation/kickstart-commands-and-options-reference_installing-rhel-as-an-experienced-user#kickstart-commands-for-handling-storage_kickstart-commands-and-options-reference
+clearpart --all --initlabel
+zerombr
+ignoredisk --only-use=vda
+#autopart --nohome --noswap --type=lvm --fstype=xfs
+part /boot/efi --fstype=efi --size=200
+part /boot --fstype=xfs --asprimary --size=800
+part swap --fstype=swap --recommended
+part pv.01 --grow
+volgroup rhel pv.01
+logvol / --vgname=rhel --fstype=xfs --percent=90 --name=root

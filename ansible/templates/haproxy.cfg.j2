@@ -1,0 +1,54 @@
+global
+  log stdout format raw local0
+  daemon
+
+  # Default ciphers to use on SSL-enabled listening sockets.
+  # For more information, see ciphers(1SSL).
+  ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
+
+resolvers docker_resolver
+  nameserver dns {{ haproxy_dns_server }}:53
+
+defaults
+  log     global
+  mode    http
+  option  httplog
+  option  dontlognull
+  timeout connect 36000s
+  timeout client 36000s
+  timeout server 36000s
+
+frontend http
+  bind *:80
+  mode http
+
+  # if this is an ACME request to proof the domain ownder, then redirect to nginx-certbot server
+  #acl is_not_well_known path_beg -i /.not-well-known/
+  # else redirect the traffic to https
+  #redirect scheme https code 301 if !is_not_well_known !{ ssl_fc }
+  #use_backend letsencrypt if is_not_well_known
+
+  redirect scheme https code 301 if !{ ssl_fc }
+
+#backend letsencrypt
+#  server letsencrypt 192.168.42.28:8080 check init-addr none
+
+frontend https
+  bind *:443 ssl crt-list /usr/local/etc/haproxy/crt-list.cfg
+  option forwardfor
+  http-response set-header Strict-Transport-Security "max-age=16000000; includeSubDomains; preload;"
+
+{% for endpoint in haproxy_endpoints %}
+  acl host_{{ endpoint.name }} hdr(host) -i {{ endpoint.domain }}
+  use_backend {{ endpoint.name }} if host_{{ endpoint.name }}
+
+{% endfor %}
+
+  default_backend nginx_websrv
+
+{% for endpoint in haproxy_endpoints %}
+backend {{ endpoint.name }}
+  server {{ endpoint.name }} {{ endpoint.ip }}:{{ endpoint.port }}
+  http-request add-header X-Forwarded-Proto https if { ssl_fc }
+
+{% endfor %}

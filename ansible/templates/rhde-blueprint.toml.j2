@@ -1,0 +1,81 @@
+name = "{{ image_name }}"
+description = "{{ image_description }}"
+version = "{{ image_version }}"
+groups = []
+distro = ""
+
+{% for package in packages %}
+[[packages]]
+name = "{{ package }}"
+
+{% endfor %}
+
+[customizations]
+hostname = "{{ hostname }}"
+partitioning_mode = "{{ partitioning_mode | default('lvm') }}"
+installation_device = "{{ installation_device | default('/dev/sda') }}"
+
+[customizations.locale]
+languages = ["en_US.UTF-8"]
+keyboard = "us"
+
+[customizations.kernel]
+append = "{{ kernel_options | default('') }}"
+
+[[customizations.sshkey]]
+user = "root"
+key = "{{ root_ssh_key }}"
+
+{% for user in extra_users %}
+[[customizations.user]]
+name = "{{ user.name }}"
+key = "{{ user.ssh_key | default('') }}"
+{% if user.password is defined %}
+password = "{{ user.password }}"
+{% endif %}
+{% if user.groups is defined %}
+groups = [{% for group in user.groups %}"{{ group }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+{% endfor %}
+
+[customizations.timezone]
+timezone = "{{ timezone }}"
+ntpservers = [{% for ntpserver in ntp_servers %}"{{ ntpserver }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+
+[customizations.firewall]
+ports = [{% for port in firewall.ports %}"{{ port }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+
+[customizations.firewall.services]
+{% if firewall.services.enabled is defined %}
+enabled = [{% for service in firewall.services.enabled %}"{{ service }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+{% if firewall.services.disabled is defined %}
+disabled = [{% for service in firewall.services.disabled %}"{{ service }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+
+{% if firewall.zones is defined %}
+{% for zone in firewall.zones %}
+[[customizations.firewall.zones]]
+name = "{{ zone.name }}"
+{% if zone.sources is defined %}
+sources = [{% for source in zone.sources %}"{{ source }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+{% endfor %}
+{% endif %}
+
+[customizations.services]
+{% if services.enabled is defined %}
+enabled = [{% for service in services.enabled %}"{{ service }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+{% if services.disabled is defined %}
+disabled = [{% for service in services.disabled %}"{{ service }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+
+[[customizations.files]]
+path = "/etc/modprobe.d/nouveau-denylist.conf"
+mode = "0644"
+user = "root"
+group = "root"
+data = """blacklist nouveau
+options nouveau modeset=0
+"""

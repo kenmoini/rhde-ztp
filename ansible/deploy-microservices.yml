@@ -1,0 +1,278 @@
+---
+- name: Deploy microservices
+  hosts: edgehub
+  become: yes
+
+  vars:
+    # These two aren't needed any more
+    glueServiceContainer: quay.io/kenmoini/fdo-ansible-glue:latest
+    jobCodeAPIContainer: quay.io/kenmoini/job-code-api:latest
+
+    jobCodeWebContainer: quay.io/kenmoini/job-code-web:latest
+    scannerAppContainer: quay.io/kenmoini/scanner-app:latest
+    unifiedAPIContainer: quay.io/kenmoini/ztp-edge-unified-api:latest
+    haproxyContainer: docker.io/haproxy:latest
+    nginxContainer: docker.io/nginx:latest
+
+    #root_ca_cert_file_path: /etc/pki/ca-trust/source/anchors/ca.pem
+    root_ca_cert_file_path: ../pki-the-hard-way/.pki/root-ca/public_bundles/certs/kemo-labs-certificate-authority.cert.pem
+
+    service_containers_dir: /opt/service-containers
+    unified_api_endpoint: "https://unified-api.apps.kemo.edge"
+
+    haproxy_dns_server: 192.168.99.2
+
+    haproxy_endpoints:
+      - name: unified_api
+        domain: unified-api.apps.kemo.edge
+        ip: unified-api.kemo.edge
+        port: 9876
+      - name: scanner_app
+        domain: scanner-app.apps.kemo.edge
+        ip: scanner-app.kemo.edge
+        port: 8080
+      - name: job_code_web
+        domain: job-code-manager.apps.kemo.edge
+        ip: job-code-web.kemo.edge
+        port: 8501
+      - name: nginx_websrv
+        domain: websrv.apps.kemo.edge
+        ip: websrv.kemo.edge
+        port: 80
+
+    services:
+      - name: unified-api
+        image: "{{ unifiedAPIContainer }}"
+        network:
+          name: lanBridge
+          ip: 192.168.99.14
+          ports:
+            - 9876
+        volumes:
+          - host_path: /opt/job-codes
+            container_path: /opt/job-codes
+          - host_path: /opt/isos
+            container_path: /opt/isos
+          - host_path: "/etc/pki/ca-trust/extracted"
+            container_path: "/etc/pki/ca-trust/extracted:ro"
+          - host_path: "/etc/pki/tls"
+            container_path: "/etc/pki/tls:ro"
+        resources:
+          memory: 512m
+        env:
+        - name: "JOB_CODES_DIR"
+          value: "/opt/job-codes"
+        - name: "ISO_DIR"
+          value: "/opt/isos"
+        - name: AAP_CONTROLLER_URL
+          value: "https://aap2-controller.kemo.edge"
+        - name: AAP_CONTROLLER_TOKEN
+          value: LmcwokPirudGDMBJWYgxNj5RkVW2iE
+        - name: AAP_GLUE_JOB_TEMPLATE_ID
+          value: 9
+        - name: AAP_GLUE_INVENTORY_ID
+          value: 2
+        - name: AAP_UPDATE_PXE_JOB_TEMPLATE_ID
+          value: 10
+
+      - name: scanner-app
+        image: "{{ scannerAppContainer }}"
+        network:
+          name: lanBridge
+          ip: 192.168.99.15
+          ports:
+            - 8080
+        resources:
+          memory: 512m
+        volumes:
+          - host_path: "/etc/pki/ca-trust/extracted"
+            container_path: "/etc/pki/ca-trust/extracted:ro"
+          - host_path: "/etc/pki/tls"
+            container_path: "/etc/pki/tls:ro"
+
+      - name: job-code-web
+        image: "{{ jobCodeWebContainer }}"
+        network:
+          name: lanBridge
+          ip: 192.168.99.17
+          ports:
+            - 8501
+        resources:
+          memory: 512m
+        env:
+          - name: "BACKEND_API"
+            value: "https://unified-api.apps.kemo.edge"
+        volumes:
+          - host_path: "/etc/pki/ca-trust/extracted"
+            container_path: "/etc/pki/ca-trust/extracted:ro"
+          - host_path: "/etc/pki/tls"
+            container_path: "/etc/pki/tls:ro"
+
+      - name: haproxy-ingress
+        image: "{{ haproxyContainer }}"
+        network:
+          name: lanBridge
+          ip: 192.168.99.16
+          ports:
+            - 80
+            - 443
+        volumes:
+          - host_path: "{{ service_containers_dir }}/haproxy-ingress/volumes/config"
+            container_path: "/usr/local/etc/haproxy:ro"
+          - host_path: "{{ service_containers_dir }}/shared/volumes/certs"
+            container_path: "/usr/local/etc/certs:ro"
+        extra_args:
+          - "--sysctl net.ipv4.ip_unprivileged_port_start=0"
+
+      - name: nginx-websrv
+        image: "{{ nginxContainer }}"
+        network:
+          name: lanBridge
+          ip: 192.168.99.12
+          ports:
+            - 80
+        volumes:
+          - host_path: /opt/isos
+            container_path: /usr/share/nginx/html/isos
+          - host_path: /opt/pxe
+            container_path: /usr/share/nginx/html/pxe
+          - host_path: /opt/dropbox
+            container_path: /usr/share/nginx/html/dropbox
+          - host_path: /opt/ostree
+            container_path: /usr/share/nginx/html/ostree
+
+    packages:
+      - podman
+      - cockpit
+      - cockpit-podman
+
+  tasks:
+    - name: Copy the root cert to the host
+      ansible.builtin.copy:
+        src: "{{ root_ca_cert_file_path }}"
+        dest: "/etc/pki/ca-trust/source/anchors/internal-root-ca.pem"
+
+    - name: Update the system CA trust
+      ansible.builtin.command:
+        cmd: update-ca-trust
+
+    - name: update packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Install Podman and Cockpit
+      ansible.builtin.dnf:
+        name: "{{ packages }}"
+        state: present
+
+    - name: Start the cockpit service
+      ansible.builtin.systemd:
+        name: cockpit.socket
+        state: started
+        enabled: yes
+
+    - name: Start the podman service
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - podman.socket
+        - podman.service
+
+    - name: Pull the container images
+      containers.podman.podman_image:
+        name: "{{ container_image }}"
+        pull: yes
+        force: yes
+      loop:
+        - "{{ glueServiceContainer }}"
+        - "{{ jobCodeAPIContainer }}"
+        - "{{ jobCodeWebContainer }}"
+        - "{{ scannerAppContainer }}"
+        - "{{ unifiedAPIContainer }}"
+        - "{{ haproxyContainer }}"
+        - "{{ nginxContainer }}"
+      loop_control:
+        loop_var: container_image
+
+    - name: Template the container unit files
+      ansible.builtin.template:
+        src: "templates/caas.service.j2"
+        dest: "/etc/systemd/system/{{ service.name }}.service"
+      loop: "{{ services }}"
+      loop_control:
+        loop_var: service
+
+    - name: Create the service directories
+      ansible.builtin.file:
+        path: "{{ service_containers_dir }}/{{ service.name }}"
+        state: directory
+      loop: "{{ services }}"
+      loop_control:
+        loop_var: service
+
+    - name: Create the service scripts directories
+      ansible.builtin.file:
+        path: "{{ service_containers_dir }}/{{ service.name }}/scripts"
+        state: directory
+      loop: "{{ services }}"
+      loop_control:
+        loop_var: service
+
+    - name: Make needed shared directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "/opt/job-codes"
+        - "/opt/isos"
+        - "/opt/dropbox"
+        - "/opt/pxe"
+        - "/opt/ostree"
+        - "{{ service_containers_dir }}/shared/volumes/certs"
+        - "{{ service_containers_dir }}/haproxy-ingress/volumes/config"
+        - "{{ service_containers_dir }}/scanner-app/volumes/config"
+
+    - name: Template the scanner app config
+      ansible.builtin.template:
+        src: "templates/scanner-app.config.js.j2"
+        dest: "{{ service_containers_dir }}/scanner-app/volumes/config/frontend-connection.js"
+
+    - name: Copy the wildcard certificate to the host
+      ansible.builtin.copy:
+        src: "../pki-the-hard-way/.pki/root-ca/intermediates/kemo-labs-intermediate-certificate-authority/signing/kemo-labs-edge-sca/certs/bundle_haproxy-edge-hub.kemo.edge.cert.pem"
+        dest: "{{ service_containers_dir }}/shared/volumes/certs/haproxy_wildcard.pem"
+
+    - name: Template the HAProxy config file over
+      ansible.builtin.template:
+        src: "templates/haproxy.cfg.j2"
+        dest: "{{ service_containers_dir }}/haproxy-ingress/volumes/config/haproxy.cfg"
+
+    - name: Template the HAProxy crtlist file over
+      ansible.builtin.template:
+        src: "templates/crt-list.cfg.j2"
+        dest: "{{ service_containers_dir }}/haproxy-ingress/volumes/config/crt-list.cfg"
+
+    - name: Create the container init scripts
+      ansible.builtin.template:
+        src: "templates/servicectl.sh.j2"
+        dest: "{{ service_containers_dir }}/{{ service.name }}/scripts/servicectl.sh"
+        mode: 0755
+      loop: "{{ services }}"
+      loop_control:
+        loop_var: service
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Start the container services
+      ansible.builtin.systemd:
+        name: "{{ service.name }}"
+        state: started
+        enabled: yes
+      loop: "{{ services }}"
+      loop_control:
+        loop_var: service

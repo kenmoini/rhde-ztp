@@ -1,0 +1,4 @@
+/usr/local/etc/certs/haproxy_wildcard.pem
+{% for endpoint in haproxy_endpoints %}
+/usr/local/etc/certs/haproxy_wildcard.pem [alpn h2 ssl-min-ver TLSv1.2] {{ endpoint.domain }}
+{% endfor %}
