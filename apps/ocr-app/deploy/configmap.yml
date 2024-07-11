@@ -7,4 +7,4 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
 data:
   frontend-connection.js: |
-    var apiEndpoint = "https://ocr-api.apps.ocp4.example.com";
+    var apiEndpoint = "https://ocr-api.apps.ocp4.example.com/createJobCodeClaim";
