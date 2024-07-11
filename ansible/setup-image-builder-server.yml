@@ -14,6 +14,15 @@
     microshift_release: "4.15"
     pull_secret: "{{ lookup('file', '/opt/rh-pull-secret.json') }}"
 
+    # Lock the RHEL release
+    rhc_release: 9.4
+    # Set repos
+    rhc_repositories:
+      - {name: "rhel-9-for-x86_64-baseos-rpms", state: enabled}
+      - {name: "rhel-9-for-x86_64-appstream-rpms", state: enabled}
+      - {name: "codeready-builder-for-rhel-9-x86_64-rpms", state: enabled}
+
+
   tasks:
     - name: Install needed packages
       ansible.builtin.dnf:
@@ -88,7 +97,7 @@
             dest: "/tmp/nvidia-cdk-ex.toml"
             content: |
               id = "nvidia-cdk-ex-stable-x86_64"
-              name = "NVIDIA CDK for RHEL 9"
+              name = "Experimental NVIDIA CDK for RHEL 9"
               type = "yum-baseurl"
               url = "https://nvidia.github.io/libnvidia-container/experimental/rpm/{{ ansible_architecture }}"
               check_gpg = false
@@ -118,7 +127,7 @@
             - "/tmp/fast-datapath.toml"
             - "/tmp/nvidia-cuda.toml"
             - "/tmp/nvidia-cdk.toml"
-            - "/tmp/nvidia-cdk-ex.toml"
+            #- "/tmp/nvidia-cdk-ex.toml"
 
         - name: Enable OCP repo on the host for Microshift
           community.general.rhsm_repository:

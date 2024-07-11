@@ -101,18 +101,20 @@
       new_serviceinfo_api_server_config:
         service_info:
           after_onboarding_reboot: true
+          diskencryption_clevis: null
+          additional_serviceinfo: null
           initial_user:
             username: ansible
             password: password123
             sshkeys:
-              - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB MasterKemoKey"
+              - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB"
           files:
             - path: /etc/glue/init.sh
               permissions: 755
               source_path: /etc/fdo-device/cfg/etc/glue/init.sh
             - path: /etc/rpm-ostreed.conf
               permissions: 644
-              source_path: /etc/fdo-device/cfg/etc/rpm-ostreed.conf 
+              source_path: /etc/fdo-device/cfg/etc/rpm-ostreed.conf
             - path: /etc/modprobe.d/nouveau-denylist.conf
               permissions: 644
               source_path: /etc/fdo-device/cfg/etc/modprobe.d/nouveau-denylist.conf
@@ -121,34 +123,34 @@
               source_path: /etc/fdo-device/cfg/etc/systemd/system/applyupdate.service
             - path: /etc/systemd/system/fdo-ansible-glue.service
               permissions: 644
-              source_path: /etc/fdo-device/cfg/etc/systemd/system/glue.service
+              source_path: /etc/fdo-device/cfg/etc/systemd/system/fdo-ansible-glue.service
             - path: /etc/systemd/system/applyupdate.timer
               permissions: 644
               source_path: /etc/fdo-device/cfg/etc/systemd/system/applyupdate.timer
           commands:
             - command: usermod
               args:
-                - -a
-                - -G
-                - wheel
-                - ansible
+                - "-a"
+                - "-G"
+                - "wheel"
+                - "ansible"
             - command: systemctl
               args:
-                - daemon-reload
+                - "daemon-reload"
             - command: systemctl
               args:
-                - enable
-                - --now
-                - rpm-ostreed-automatic.timer
-                - applyupdate.timer
-                - openssh-server.service
-                - glue.service
+                - "enable"
+                - "--now"
+                - "rpm-ostreed-automatic.timer"
+                - "applyupdate.timer"
+                - "openssh-server.service"
+                - "glue.service"
             - command: rpm-ostree
               args:
-                - kargs
-                - --append=console=tty0
-                - --append=console=ttyS0,115200
-                - --append=modprobe.blacklist=nouveau
+                - "kargs"
+                - "--append=console=tty0"
+                - "--append=console=ttyS0,115200"
+                - "--append=modprobe.blacklist=nouveau"
 
   - name: Merge the YAML data
     ansible.builtin.set_fact:
@@ -160,7 +162,7 @@
 
   - name: Write the new configuration to the file
     ansible.builtin.copy:
-      content: "{{ serviceinfo_api_server_config | to_nice_yaml }}"
+      content: "{{ serviceinfo_api_server_config | to_nice_yaml(indent=2, sort_keys=False) }}"
       dest: /etc/fdo/aio/configs/serviceinfo_api_server.yml
       owner: root
       group: root
