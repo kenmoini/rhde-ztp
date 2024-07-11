@@ -17937,10 +17937,10 @@ var __Html5QrcodeLibrary__;
                         return "Start Scanning";
                     }),
                     (t.torchOnButton = function () {
-                        return "Switch On Torch";
+                        return "Switch On Light";
                     }),
                     (t.torchOffButton = function () {
-                        return "Switch Off Torch";
+                        return "Switch Off Light";
                     }),
                     (t.torchOnFailedMessage = function () {
                         return "Failed to turn on torch";
