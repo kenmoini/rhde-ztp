@@ -135,7 +135,7 @@ def createJobCodeClaimRoute():
 
         # Make sure a Job Code file exists
         if not os.path.exists(jobCodePath + "/" + jobCode + ".yaml"):
-            return json.dumps({"error": "Job Code does not exist"})
+            return json.dumps({"status": "failed", "error": "Job Code does not exist"})
         
         # Write the data to a new YAML file for the Job Code Claim
         jobCodeClaimFile = open(jobCodePath + "/claims/" + macAddressDashLower + ".yaml", "w")
@@ -170,7 +170,7 @@ def createJobCodeClaimRoute():
                                                            "job_code": jobCodeInfo["job_code"]})}, verify=False)
 
         if runJobTemplate.status_code != 201:
-            return json.dumps({"error": "Error launching job in AAP2 Controller"})
+            return json.dumps({"status": "failed", "error": "Error launching job in AAP2 Controller"})
         else:
             # Return the JSON message
             return json.dumps({"status": "success", "jobCodeData": jobCodeInfo, "jobCodeClaimData": jobCodeClaimData})
