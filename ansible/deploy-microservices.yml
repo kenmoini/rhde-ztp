@@ -89,6 +89,8 @@
             container_path: "/etc/pki/ca-trust/extracted:ro"
           - host_path: "/etc/pki/tls"
             container_path: "/etc/pki/tls:ro"
+          - host_path: "{{ service_containers_dir }}/scanner-app/volumes/config"
+            container_path: "/opt/app-root/src/config:ro"
 
       - name: job-code-web
         image: "{{ jobCodeWebContainer }}"
