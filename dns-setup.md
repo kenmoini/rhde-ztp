@@ -242,6 +242,8 @@ dns:
             value: 192.168.99.15/24
           - name: "*.apps"
             value: 192.168.99.16
+          - name: job-code-web
+            value: 192.168.99.17
 
 EOF
 
