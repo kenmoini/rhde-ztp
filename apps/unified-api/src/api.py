@@ -23,7 +23,7 @@ aapControllerToken = os.environ.get("AAP_CONTROLLER_TOKEN", "")
 aapGlueJobTemplateID = os.environ.get("AAP_GLUE_JOB_TEMPLATE_ID", "123456")
 aapUpdatePXEJobTemplateID = os.environ.get("AAP_UPDATE_PXE_JOB_TEMPLATE_ID", "123456")
 
-aapGlueInventoryID = os.environ.get("AAP_INVENTORY_ID", "123456")
+aapGlueInventoryID = os.environ.get("AAP_GLUE_INVENTORY_ID", "123456")
 #aapUpdatePXEInventoryID = os.environ.get("AAP_INVENTORY_ID", "123456")
 
 ##############################
