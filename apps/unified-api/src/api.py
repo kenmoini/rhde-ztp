@@ -165,7 +165,7 @@ def createJobCodeClaimRoute():
 
         # Kick off the Ansible Job Template that reconfigures the PXE server
         runJobTemplate = requests.post(aapControllerURL.replace('"','') + "/api/v2/job_templates/" + aapUpdatePXEJobTemplateID.replace('"','') + "/launch/",
-                                        headers={"Authorization": "Bearer " + aapControllerToken},
+                                        headers={"Authorization": "Bearer " + aapControllerToken.replace('"','')},
                                         json={"extra_vars": json.dumps({"mac_address": macAddressInput,
                                                            "ipv4_address": jobCodeInfo["ipv4_address"],
                                                            "ipv4_gateway": jobCodeInfo["ipv4_gateway"],
