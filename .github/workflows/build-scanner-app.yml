@@ -47,7 +47,7 @@ jobs:
           type=ref,event=tag
           type=sha,prefix=,suffix=,format=short
           type=sha,prefix=,suffix=,format=long
-          type=raw,value=frontend-latest
+          type=raw,value=latest
 
     - name: Login to Quay Container Registry
       uses: docker/login-action@v3
