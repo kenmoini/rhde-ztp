@@ -125,10 +125,11 @@ def createJobCodeClaimRoute():
         inputData = request.json
 
         # Assemble submitted claim data
-        macAddressInput = inputData["mac_address"]
+        #macAddressInput = inputData["mac_address"]
+        macAddressInput = inputData["scannedText"]
         macAddressDash = macAddressInput.replace(":", "-")
         macAddressDashLower = macAddressDash.lower()
-        jobCode = inputData["job_code"]
+        jobCode = inputData["jobCode"]
         submittedDate = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         jobCodeClaimData = {"mac_address": macAddressInput, "job_code": jobCode, "submitted_date": submittedDate}
 
