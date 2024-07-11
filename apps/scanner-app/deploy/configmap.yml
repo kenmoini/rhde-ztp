@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scanner-app-config
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+data:
+  frontend-connection.js: |
+    var apiEndpoint = "https://unified-api.apps.ocp4.example.com/createJobCodeClaim";

@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scanner-frontend
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+  labels:
+    app: scanner-frontend
+spec:
+  selector:
+    app: scanner-frontend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: scanner-frontend

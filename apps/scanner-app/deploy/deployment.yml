@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scanner-frontend
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+  labels:
+    app: scanner-frontend
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scanner-frontend
+  template:
+    metadata:
+      labels:
+        app: scanner-frontend
+    spec:
+      containers:
+        - name: scanner-frontend
+          imagePullPolicy: Always
+          image: quay.io/kenmoini/scanner-app:latest
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+              name: scanner-frontend
+          volumeMounts:
+            - mountPath: /opt/app-root/src/config
+              name: scanner-app-config
+      volumes:
+        - name: scanner-app-config
+          configMap: 
+            name: scanner-app-config
+            items:
+              - key: frontend-connection.js
+                path: frontend-connection.js
