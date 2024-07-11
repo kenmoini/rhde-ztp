@@ -21,5 +21,5 @@ WORKDIR /opt/app-root/src
 
 EXPOSE 8080
 
-CMD ["nginx", "-g daemon off;"]
-#CMD ["node", "/opt/app-root/src/main.js"]
+#CMD ["nginx", "-g daemon off;"]
+CMD ["nginx", "-c /etc/nginx/nginx.conf", "-g daemon off;"]
