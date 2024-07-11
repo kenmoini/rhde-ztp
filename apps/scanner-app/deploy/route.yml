@@ -5,15 +5,15 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "15"
   labels:
-    app: scanner-frontend
-  name: scanner-frontend
+    app: scanner
+  name: scanner
 spec:
   to:
     kind: Service
-    name: scanner-frontend
+    name: scanner
     weight: 100
   port:
-    targetPort: scanner-frontend
+    targetPort: scanner
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect

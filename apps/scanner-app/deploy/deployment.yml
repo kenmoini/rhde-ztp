@@ -2,25 +2,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scanner-frontend
+  name: scanner
   annotations:
     argocd.argoproj.io/sync-wave: "5"
   labels:
-    app: scanner-frontend
+    app: scanner
 spec:
   strategy:
     type: Recreate
   replicas: 1
   selector:
     matchLabels:
-      app: scanner-frontend
+      app: scanner
   template:
     metadata:
       labels:
-        app: scanner-frontend
+        app: scanner
     spec:
       containers:
-        - name: scanner-frontend
+        - name: scanner
           imagePullPolicy: Always
           image: quay.io/kenmoini/scanner-app:latest
           resources:
@@ -33,7 +33,7 @@ spec:
           ports:
             - containerPort: 8080
               protocol: TCP
-              name: scanner-frontend
+              name: web
           volumeMounts:
             - mountPath: /opt/app-root/src/config
               name: scanner-app-config
