@@ -1,0 +1,1 @@
+var apiEndpoint = "https://ocr-api.apps.ocp4.example.com";
