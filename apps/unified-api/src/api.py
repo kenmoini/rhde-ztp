@@ -242,6 +242,7 @@ def listClaimedJobCodesRoute():
                                                            "job_code": jobCodeInfo["job_code"],
                                                            "submitted_date": submittedDate})}, verify=False)
         # Check the status of the job launch
+        print(runJobTemplate.status_code)
         if runJobTemplate.status_code != 201:
             return json.dumps({"error": "Error launching job in AAP2 Controller"})
         else:
