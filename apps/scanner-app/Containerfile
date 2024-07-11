@@ -3,14 +3,7 @@
 # podman run --name scanner-app --rm -it -p 8080:8080 scanner-app
 
 #FROM quay.io/kenmoini/b-sep-fedora-python:latest
-FROM registry.fedoraproject.org/fedora:37
-
-USER 0
-
-RUN dnf update -y --disablerepo=fedora-cisco-openh264 \
- && dnf install -y nginx --disablerepo=fedora-cisco-openh264
-
-RUN mkdir -p /opt/app-root/src && chown 1001:1001 /opt/app-root/src
+FROM quay.io/kenmoini/scanner-app-base:latest
 
 COPY --chown=1001:1001 ./src /opt/app-root/src
 COPY --chown=1001:1001 ./src/nginx.conf /etc/nginx/nginx.conf

@@ -1,0 +1,11 @@
+# podman build -t scanner-app-base -f Containerfile.base .
+# podman push scanner-app-base quay.io/kenmoini/scanner-app-base:latest
+
+FROM registry.fedoraproject.org/fedora:37
+
+USER 0
+
+RUN dnf update -y --disablerepo=fedora-cisco-openh264 \
+ && dnf install -y nginx --disablerepo=fedora-cisco-openh264
+
+RUN mkdir -p /opt/app-root/src && chown 1001:1001 /opt/app-root/src
