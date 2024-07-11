@@ -366,7 +366,7 @@
             if (json.status === 'success') {
                 alert('Job Code submitted successfully.');
             } else {
-                alert('Job Code submission failed.');
+                alert('Job Code submission failed: ' + json.error);
             }
         } catch (error) {
             console.error('Error:', error);
