@@ -1,9 +1,16 @@
-import os, json, time, yaml, requests
+import os, json, time, yaml, requests, logging
 import datetime as dt
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
+from http.client import HTTPConnection
 
 # job-code-app imported functions
+log = logging.getLogger('urllib3')
+log.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+log.addHandler(ch)
+HTTPConnection.debuglevel = 1
 
 ##############################
 # Setup Flask Variables
