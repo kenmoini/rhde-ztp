@@ -12,7 +12,7 @@ RUN dnf update -y --disablerepo=fedora-cisco-openh264 \
 
 RUN mkdir -p /opt/app-root/src
 
-ARG CACHEBUST=1 
+ENV CACHEBUST=1
 
 COPY ./src /opt/app-root/src
 COPY ./src/nginx.conf /etc/nginx/nginx.conf
