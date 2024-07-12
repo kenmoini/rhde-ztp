@@ -30,3 +30,4 @@ additional_build_steps:
     RUN dnf install -y 'dnf-command(config-manager)' && rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && /usr/bin/crb enable && dnf update -y && dnf install git -y && dnf clean all && ansible --version
   prepend_galaxy:
     - COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+    - RUN dnf install -y git
