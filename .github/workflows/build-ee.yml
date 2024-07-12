@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'ansible/execution-environment/**'
+      - .github/workflows/build-ee.yml
   push:
     branches:
       - main
     paths:
       - 'ansible/execution-environment/**'
+      - .github/workflows/build-ee.yml
 
   # Schedule workflow run at 00:00 on Sunday
   schedule:
@@ -26,11 +28,11 @@ jobs:
       EE_FOLDER_NAME: 'ansible/execution-environment'
       EE_IMAGE_NAME: 'rhde-ztp-ee'
       EE_IMAGE_TAG: 'latest'
-    secrets:
       REGISTRY_HOSTNAME: quay.io
+      REGISTRY_PATH: kenmoini
+    secrets:
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_TOKEN }}
-      REGISTRY_PATH: kenmoini
       # REDHAT_USERNAME: ${{ secrets.REDHAT_USERNAME }}
       # REDHAT_PASSWORD: ${{ secrets.REDHAT_PASSWORD }}
       # AH_TOKEN: ${{ secrets.AH_TOKEN }}
