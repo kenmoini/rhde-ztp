@@ -8,6 +8,7 @@ dependencies:
     package_pip: ansible-runner
   galaxy: requirements.yml
   python: requirements.txt
+  system: bindep.txt
 
 images:
   base_image:
