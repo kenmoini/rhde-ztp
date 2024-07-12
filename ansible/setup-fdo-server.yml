@@ -103,15 +103,15 @@
           after_onboarding_reboot: true
           diskencryption_clevis: null
           additional_serviceinfo: null
-          initial_user:
-            username: ansible
-            password: password123
-            sshkeys:
-              - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB"
+          #initial_user:
+          #  username: notcore
+          #  password: password123
+          #  sshkeys:
+          #    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB"
           files:
-            - path: /etc/glue/init.sh
+            - path: /etc/glue-init.sh
               permissions: 755
-              source_path: /etc/fdo-device/cfg/etc/glue/init.sh
+              source_path: /etc/fdo-device/cfg/etc/glue-init.sh
             - path: /etc/rpm-ostreed.conf
               permissions: 644
               source_path: /etc/fdo-device/cfg/etc/rpm-ostreed.conf
@@ -143,8 +143,8 @@
                 - "--now"
                 - "rpm-ostreed-automatic.timer"
                 - "applyupdate.timer"
-                - "openssh-server.service"
-                - "glue.service"
+                - "sshd"
+                - "fdo-ansible-glue.service"
             - command: rpm-ostree
               args:
                 - "kargs"

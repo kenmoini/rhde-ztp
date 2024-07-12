@@ -1,0 +1,46 @@
+- name: Configure PXE Server for specific MAC Address boots
+  hosts: pxeserver
+  become: yes
+
+  vars:
+    # iso_name: rhde-si.iso # taken from input
+    # mac_address: "" # taken from input
+
+    mac_address_dashes_lower: "{{ mac_address | lower | regex_replace(':', '-') }}"
+
+    pxe_server_ip: 192.168.99.10
+    httpd_server_ip: 192.168.99.12
+
+    pxe_server_path: /var/ftp/pub/pxe
+    tftp_sub_path: tftpboot
+    install_file_sub_path: install
+    architecture: x86_64 # x86_64 or aarch64
+    boot_architecture: EFI # BIOS or EFI
+
+    iso_base_name: "{{ iso_name | replace('.iso', '') }}"
+    distro_key: "{{ iso_name | replace('.iso', '') | replace('.', '') | replace('-', '') | replace('_', '') }}"
+    distro_arch_key: "{{ distro_key }}{{ architecture | replace('_', '') }}"
+    iso_path: "{{ pxe_server_path }}/install/{{ architecture }}/{{ distro_key }}/iso"
+    extract_iso_path: "{{ pxe_server_path }}/install/{{ architecture }}/{{ distro_key }}/ext"
+
+    efi_pxe_config_path: "{{ pxe_server_path }}/{{ tftp_sub_path }}/{{ boot_architecture }}/{{ architecture }}"
+    bios_pxe_config_path: "{{ pxe_server_path }}/{{ tftp_sub_path }}/{{ boot_architecture }}/{{ architecture }}/pxelinux.cfg"
+
+  tasks:
+    - name: Template EFI Boot Configuration
+      template:
+        src: templates/per-mac-uefi-grub.cfg.j2
+        dest: "{{ efi_pxe_config_path }}/grub.cfg-01-{{ mac_address_dashes_lower }}"
+        mode: 0644
+
+    - name: Template BIOS Boot Configuration
+      template:
+        src: templates/per-mac-bios-pxelinux.cfg.j2
+        dest: "{{ bios_pxe_config_path }}/01-{{ mac_address_dashes_lower }}"
+        mode: 0644
+
+    - name: Template PXELinux Menu defaults
+      template:
+        src: templates/pxe-menu-defaults.cfg.j2
+        dest: "{{ bios_pxe_config_path }}/pxe-menu-defaults.cfg"
+        mode: 0644

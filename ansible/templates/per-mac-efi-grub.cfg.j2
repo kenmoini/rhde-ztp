@@ -1,0 +1,26 @@
+# /var/ftp/pub/pxe/tftpboot/{{ boot_architecture }}/{{ architecture }}/grub.cfg-01-{{ mac_address_dashes_lower }}
+
+set default="1"
+
+function load_video {
+  insmod efi_gop
+  insmod efi_uga
+  insmod video_bochs
+  insmod video_cirrus
+  insmod all_video
+}
+
+load_video
+set gfxpayload=keep
+insmod gzio
+insmod part_gpt
+insmod ext2
+
+set timeout=3
+### END /etc/grub.d/00_header ###
+
+menuentry 'Boot RHDE Simplified Installer - HTTP' --class rhel --class {{ distro_arch_key }} {
+    linuxefi /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/vmlinuz inst.stage2=http://{{ httpd_server_ip }}/pxe/install/{{ architecture }}/{{ distro_key }}/ext/{{ iso_base_name }} inst.repo=http://{{ httpd_server_ip }}/pxe/install/{{ architecture }}/{{ distro_key }}/ext/{{ iso_base_name }}
+    initrdefi /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/initrd.img
+}
+

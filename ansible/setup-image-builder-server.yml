@@ -70,10 +70,9 @@
               name = "NVIDIA CUDA Drivers for RHEL 9"
               type = "yum-baseurl"
               url = "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/{{ ansible_architecture }}"
-              check_gpg = true
-              check_repogpg = true
+              check_gpg = false
+              check_repogpg = false
               check_ssl = true
-              gpgkeys = ["https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/D42D0685.pub"]
               system = false
               rhsm = false
 
@@ -86,9 +85,8 @@
               type = "yum-baseurl"
               url = "https://nvidia.github.io/libnvidia-container/stable/rpm/{{ ansible_architecture }}"
               check_gpg = false
-              check_repogpg = true
+              check_repogpg = false
               check_ssl = true
-              gpgkeys = ["https://nvidia.github.io/libnvidia-container/gpgkey"]
               system = false
               rhsm = false
 
@@ -101,9 +99,8 @@
               type = "yum-baseurl"
               url = "https://nvidia.github.io/libnvidia-container/experimental/rpm/{{ ansible_architecture }}"
               check_gpg = false
-              check_repogpg = true
+              check_repogpg = false
               check_ssl = true
-              gpgkeys = ["https://nvidia.github.io/libnvidia-container/gpgkey"]
               system = false
               rhsm = false
 

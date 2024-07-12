@@ -1,0 +1,63 @@
+name = "{{ image_name }}"
+description = "{{ image_description }}"
+version = "{{ image_version }}"
+modules = []
+groups = []
+distro = "{{ image_distro }}"
+
+{% if compose_type == "edge-simplified-installer" %}
+[customizations]
+installation_device = "{{ installation_device | default('/dev/sda') }}"
+
+[customizations.fdo]
+manufacturing_server_url = "{{ fdo_manufacturing_server_url }}"
+diun_pub_key_insecure = "true"
+
+{% for user in extra_users %}
+[[customizations.user]]
+name = "{{ user.name }}"
+key = "{{ user.ssh_key | default('') }}"
+{% if user.password is defined %}
+password = "{{ user.password }}"
+{% endif %}
+{% if user.groups is defined %}
+groups = [{% for group in user.groups %}"{{ group }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+{% endfor %}
+
+{% endif %}
+
+{% if compose_type != "edge-simplified-installer" %}
+{% for package in packages %}
+[[packages]]
+name = "{{ package }}"
+
+{% endfor %}
+
+[customizations.locale]
+languages = ["en_US.UTF-8"]
+keyboard = "us"
+
+[customizations.timezone]
+timezone = "{{ timezone }}"
+ntpservers = [{% for ntpserver in ntp_servers %}"{{ ntpserver }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+
+[[customizations.files]]
+path = "/etc/modprobe.d/nouveau-denylist.conf"
+mode = "0644"
+user = "root"
+group = "root"
+data = """blacklist nouveau
+options nouveau modeset=0
+"""
+
+[[customizations.files]]
+path = "/etc/selinux/config"
+mode = "0644"
+user = "root"
+group = "root"
+data = """SELINUX=permissive
+
+SELINUXTYPE=targeted
+"""
+{% endif %}

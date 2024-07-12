@@ -1,0 +1,148 @@
+# Create a Minimal Blueprint - Make an edge-commit image with a minimal set of packages
+# Extract the edge-commit image to the target repo
+# Create a edge-simplified-installer image with the InstallDisk/FDO/OSTree information
+# Extract the edge-simplified-installer ISO to the PXE server paths
+# https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/composing_installing_and_managing_rhel_for_edge_images/creating-and-managing-ostree-image-updates_composing-installing-managing-rhel-for-edge-images#managing-a-centralized-ostree-mirror_creating-and-managing-ostree-image-updates
+---
+- name: Create Image Builder Blueprints
+  hosts: buildserver
+  become: yes
+  vars:
+    create_blueprints: true
+    create_image: true
+    extract_image: true
+    #image_name: "rhde-si-image"
+    #blueprint_file: si-fdo-blueprint.toml
+    #compose_type: edge-simplified-installer
+    #image_size: 2
+    
+    #image_name: "rhde-base-image"
+    #blueprint_file: rhde-blueprint.toml
+    #compose_type: edge-container
+
+    #image_name: "minimal-rhel810-image"
+    #image_distro: rhel-810
+    image_name: "minimal-rhel94-image"
+    image_distro: rhel-94
+    blueprint_file: minimal-blueprint.toml
+    compose_type: edge-commit
+    # compose_type: edge-simplified-installer # allowed customizations: InstallationDevice, FDO, User, Group, FIPS
+
+    image_version: "1.0.0"
+    image_description: "Blueprint for building the RHDE image with Microshift preloaded"
+
+    architecture: x86_64
+    #target_iso_path: "/var/ftp/pub/pxe/install/{{ architecture }}/{{ image_name | replace('-', '') }}/iso"
+    target_iso_path: /opt/isos
+    target_repo_path: /opt/ostree
+    image_builder_endpoint: "http://192.168.99.12/ostree/repo"
+    #image_builder_ref: rhel/8/x86_64/edge
+    image_builder_ref: rhel/9/x86_64/edge
+
+    fdo_manufacturing_server_url:  "http://192.168.99.10:8080"
+
+    packages:
+      - cockpit
+      - cockpit-storaged
+      - openssh-server
+      - microshift
+      - microshift-greenboot
+      - microshift-networking
+      - microshift-olm
+      - microshift-olm-release-info
+      - microshift-release-info
+      - microshift-selinux
+      - selinux-policy
+      - selinux-policy-targeted
+      - setroubleshoot-server
+
+    services:
+      enabled:
+        - sshd
+        - cockpit.socket
+
+    hostname: edgy
+    timezone: America/New_York
+    ntp_servers:
+      - time.apple.com
+      - time1.apple.com
+      - time2.apple.com
+
+    partitioning_mode: lvm
+    installation_device: /dev/vda
+
+    kernel_options: "modprobe.blacklist=nouveau"
+    root_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB MasterKemoKey"
+
+    extra_users:
+      - name: ansible
+        password: password123
+        ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB MasterKemoKey"
+        groups:
+          - wheel
+      - name: shift
+        password: password123
+        ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB MasterKemoKey"
+        groups:
+          - wheel
+    
+    firewall:
+      ports:
+        - 6443:tcp
+      services:
+        enabled:
+          - ssh
+          - cockpit
+      zones:
+        - name: trusted
+          sources:
+            - "10.42.0.0/16"
+            - "169.254.169.1"
+
+  tasks:
+    - name: Create blueprints
+      when: create_blueprints
+      block:
+        - name: Create RHDE Blueprint
+          ansible.builtin.template:
+            src: templates/{{ blueprint_file }}.j2
+            dest: /tmp/{{ blueprint_file }}
+
+        - name: Push blueprint into image builder
+          infra.osbuild.push_blueprint:
+            src: "/tmp/{{ blueprint_file }}"
+
+    - name: Create images
+      when: create_image
+      block:
+        - name: Start compose
+          infra.osbuild.start_compose:
+            blueprint: "{{ image_name }}"
+            compose_type: "{{ compose_type }}"
+            #size: "{{ image_size | default(omit) }}"
+            ostree_url: "{{ image_builder_endpoint if compose_type == 'edge-simplified-installer' else omit }}"
+            ostree_ref: "{{ image_builder_ref if compose_type == 'edge-simplified-installer' else omit }}"
+          register: builder_compose_start_out
+
+        - name: Wait for compose
+          infra.osbuild.wait_compose:
+            compose_id: "{{ builder_compose_start_out['result']['body']['build_id'] }}"
+            timeout: 7200
+
+        - name: Export the compose artifact
+          infra.osbuild.export_compose:
+            compose_id: "{{ builder_compose_start_out['result']['body']['build_id'] }}"
+            dest: "{{ target_iso_path if compose_type not in ['edge-commit', 'edge-container'] else target_repo_path }}/{{ image_name }}.{{ 'tar' if compose_type in ['edge-commit', 'edge-container'] else 'iso' }}"
+
+    - name: Extract the tar if needed
+      when: compose_type in ['edge-commit', 'edge-container'] and extract_image
+      ansible.builtin.unarchive:
+        src: "{{ target_repo_path }}/{{ image_name }}.tar"
+        dest: "{{ target_repo_path }}"
+        remote_src: yes
+
+    - name: Pass along the ISO name of the edge-simplified-installer image
+      when: compose_type == 'edge-simplified-installer'
+      ansible.builtin.set_stats:
+        data:
+          edge_si_iso_name:  "{{ target_iso_path }}/{{ image_name }}.iso"

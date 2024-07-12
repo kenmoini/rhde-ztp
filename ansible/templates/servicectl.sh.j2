@@ -26,7 +26,7 @@ VOLUMES=""
 {% endif %}
 
 {% if service.env is defined %}
-ENV_VARS="{% for env in service.env %}-e {{ env.name }}="{{ env.value }}" {% endfor %}"
+ENV_VARS='{% for env in service.env %}-e {{ env.name }}={{ env.value }} {% endfor %}'
 {% else %}
 ENV_VARS=""
 {% endif %}

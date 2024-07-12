@@ -1,0 +1,16 @@
+[buildserver]
+edge-hub.kemo.edge ansible_host=192.168.99.10 ansible_user=root ansible_ssh_private_key_file=~/.ssh/MasterKemoKey
+#pxe.kemo.labs ansible_user=root ansible_ssh_private_key_file=~/.ssh/MasterKemoKey
+
+[fdoserver]
+edge-hub.kemo.edge ansible_host=192.168.99.10 ansible_user=root ansible_ssh_private_key_file=~/.ssh/MasterKemoKey
+#fdo.kemo.labs ansible_host=192.168.43.184 ansible_user=root ansible_ssh_private_key_file=~/.ssh/MasterKemoKey
+
+[edgehub]
+edge-hub.kemo.edge ansible_host=192.168.99.10 ansible_user=root ansible_ssh_private_key_file=~/.ssh/MasterKemoKey
+
+[ostreemirror]
+edge-hub.kemo.edge ansible_host=192.168.99.10 ansible_user=root ansible_ssh_private_key_file=~/.ssh/MasterKemoKey
+
+[pxeserver]
+edge-hub.kemo.edge ansible_host=192.168.99.10 ansible_user=root ansible_ssh_private_key_file=~/.ssh/MasterKemoKey

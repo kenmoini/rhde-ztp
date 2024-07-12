@@ -1,0 +1,34 @@
+TIMEOUT 100
+TOTALTIMEOUT 1000
+ONTIMEOUT boottarget
+default vesamenu.c32
+PROMPT 0
+
+menu include pxelinux.cfg/pxe-menu-defaults.cfg
+
+NOESCAPE 1
+
+label boottarget
+  menu label Red Hat Enterprise Linux 9.4 - HTTP
+  kernel rhel94/rhel94x8664/vmlinuz
+  initrd rhel94/rhel94x8664/initrd.img
+  append inst.stage2=http://192.168.99.12/pxe/install/x86_64/rhel94/ext/rhel-9.4 inst.repo=http://192.168.99.12/pxe/install/x86_64/rhel94/ext/rhel-9.4 quiet
+
+menu separator # insert an empty line
+
+# utilities submenu
+menu begin ^Troubleshooting
+  menu title Troubleshooting
+
+label local
+  menu label Boot from ^local drive
+  localboot 0
+
+menu separator # insert an empty line
+menu separator # insert an empty line
+
+label returntomain
+  menu label Return to ^main menu
+  menu exit
+
+menu end

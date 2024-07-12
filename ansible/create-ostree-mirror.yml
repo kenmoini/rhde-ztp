@@ -1,0 +1,14 @@
+---
+- name: Create an OSTree Repo
+  hosts: ostreemirror
+  become: yes
+
+  vars:
+    packages:
+      - createrepo_c
+
+  tasks:
+    - name: Install required packages
+      package:
+        name: "{{ packages }}"
+        state: present

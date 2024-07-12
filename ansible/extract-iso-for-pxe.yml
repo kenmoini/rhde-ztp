@@ -1,0 +1,50 @@
+---
+- name: Extract an ISO file for the PXE server
+  hosts: pxeserver
+  become: yes
+
+  vars:
+    iso_name: minimal-rhel94-image.iso
+    iso_base_name: "{{ iso_name | replace('.iso', '') }}"
+    architecture: x86_64
+    distro_key: "{{ iso_name | replace('.iso', '') | replace('.', '') | replace('-', '') | replace('_', '') }}"
+    distro_arch_key: "{{ distro_key }}{{ architecture | replace('_', '') }}"
+    iso_src: /opt/isos
+    # eg /var/ftp/pub/pxe/install/x86_64/rhel94/ext
+    target_iso_ext_path: /var/ftp/pub/pxe/install/{{ architecture }}/{{ distro_key }}/ext
+    boot_protocol: EFI
+    efi_kernel: vmlinuz
+    efi_initrd: initrd.img
+    pxe_tftp_path: /var/ftp/pub/pxe/tftpboot
+    # eg /var/ftp/pub/pxe/tftpboot/EFI/x86_64/rhel94/rhel94x8664
+    target_pxe_path: "{{ pxe_tftp_path }}/{{ boot_protocol }}/{{ architecture }}/{{ distro_key }}/{{ iso_base_name }}"
+
+  tasks:
+    - name: Create needed directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ target_iso_ext_path }}/{{ iso_base_name }}/images/pxeboot"
+        - "{{ target_pxe_path }}"
+
+    - name: Mount the ISO to the mounting directory
+      ansible.posix.mount:
+        path: "{{ target_iso_ext_path }}/{{ iso_base_name }}"
+        src: "{{ iso_src }}/{{ iso_name }}"
+        fstype: iso9660
+        opts: ro,loop
+        state: mounted
+        boot: true
+
+    - name: Copy kernel and initramfs files for EFI boot
+      ansible.builtin.copy:
+        src: "{{ target_iso_ext_path }}/{{ iso_base_name }}/images/pxeboot/{{ item }}"
+        dest: "{{ target_pxe_path }}/{{ item }}"
+        remote_src: yes
+        owner: nobody
+        group: nobody
+        mode: 0644
+      loop:
+        - "{{ efi_kernel }}"
+        - "{{ efi_initrd }}"

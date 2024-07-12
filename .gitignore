@@ -1,2 +1,3 @@
 pki-the-hard-way/.pki/
 pki-the-hard-way/.pki/**
+ansible/execution-environment/context/

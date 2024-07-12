@@ -13,6 +13,8 @@
     unifiedAPIContainer: quay.io/kenmoini/ztp-edge-unified-api:latest
     haproxyContainer: docker.io/haproxy:latest
     nginxContainer: docker.io/nginx:latest
+    registryContainer: docker.io/library/registry:2
+    ntpContainer: docker.io/publicarray/chrony:latest
 
     #root_ca_cert_file_path: /etc/pki/ca-trust/source/anchors/ca.pem
     root_ca_cert_file_path: ../pki-the-hard-way/.pki/root-ca/public_bundles/certs/kemo-labs-certificate-authority.cert.pem
@@ -21,6 +23,12 @@
     unified_api_endpoint: "https://unified-api.apps.kemo.edge"
 
     haproxy_dns_server: 192.168.99.2
+
+    mirror_htpasswd: |
+      # mirrormirror / Passw0rd123
+      mirrormirror:$2y$05$RQPTU52YU9MUUzt0p6/qg.OowR0msnkz8hzvnU7WnYZzDu5HlktjK
+
+    mirror_pull_secret: '{"auths": {"registry.apps.kemo.edge": {"auth": "bWlycm9ybWlycm9yOlBhc3N3MHJkMTIz"}}}'
 
     haproxy_endpoints:
       - name: unified_api
@@ -39,6 +47,10 @@
         domain: websrv.apps.kemo.edge
         ip: websrv.kemo.edge
         port: 80
+      - name: registry
+        domain: registry.apps.kemo.edge
+        ip: registry.kemo.edge
+        port: 5000
 
     services:
       - name: unified-api
@@ -70,10 +82,12 @@
           value: LmcwokPirudGDMBJWYgxNj5RkVW2iE
         - name: AAP_GLUE_JOB_TEMPLATE_ID
           value: 9
+        - name: AAP_INVENTORY_ID
+          value: 2
         - name: AAP_GLUE_INVENTORY_ID
           value: 2
         - name: AAP_UPDATE_PXE_JOB_TEMPLATE_ID
-          value: 10
+          value: 7
 
       - name: scanner-app
         image: "{{ scannerAppContainer }}"
@@ -136,12 +150,55 @@
         volumes:
           - host_path: /opt/isos
             container_path: /usr/share/nginx/html/isos
-          - host_path: /opt/pxe
+          - host_path: /var/ftp/pub/pxe
             container_path: /usr/share/nginx/html/pxe
           - host_path: /opt/dropbox
             container_path: /usr/share/nginx/html/dropbox
           - host_path: /opt/ostree
             container_path: /usr/share/nginx/html/ostree
+          - host_path: /opt/ostree
+            container_path: /usr/share/nginx/html/ostree
+
+      - name: registry
+        image: "{{ registryContainer }}"
+        network:
+          name: lanBridge
+          ip: 192.168.99.18
+          ports:
+            - 5000
+        env:
+          - name: REGISTRY_HTTP_SECRET
+            value: "/auth/registry.htpasswd"
+          - name: REGISTRY_AUTH
+            value: "htpasswd"
+          - name: REGISTRY_AUTH_HTPASSWD_REALM
+            value: "RegistryRealm"
+          - name: REGISTRY_AUTH_HTPASSWD_PATH
+            value: "/auth/registry.htpasswd"
+        volumes:
+          - host_path: /opt/registry
+            container_path: /var/lib/registry
+          - host_path: "{{ service_containers_dir }}/shared/volumes/certs"
+            container_path: "/auth:ro"
+
+      # just use chronyd on the host
+      # - name: lab-chronyd
+      #   image: "{{ ntpContainer }}"
+      #   network:
+      #     name: host
+      #     ports:
+      #       - 123/udp
+      #       - 323/udp
+      #   extra_args:
+      #     - "--cap-add SYS_TIME"
+      #     - "-t"
+      #   resources:
+      #     memory: 64m
+      #   volumes:
+      #   - host_path: "{{ service_containers_dir }}/lab-chronyd/config/chrony.confg"
+      #     container_path: /etc/chrony.conf:Z
+      #   - host_path: "{{ service_containers_dir }}/lab-chronyd/volumes/chrony"
+      #     container_path: /etc/chrony:Z
 
     packages:
       - podman
@@ -196,6 +253,8 @@
         - "{{ unifiedAPIContainer }}"
         - "{{ haproxyContainer }}"
         - "{{ nginxContainer }}"
+        - "{{ registryContainer }}"
+        # - "{{ ntpContainer }}"
       loop_control:
         loop_var: container_image
 
@@ -229,13 +288,62 @@
         state: directory
       loop:
         - "/opt/job-codes"
+        - "/opt/job-codes/claims"
         - "/opt/isos"
         - "/opt/dropbox"
         - "/opt/pxe"
         - "/opt/ostree"
+        - "/opt/registry"
         - "{{ service_containers_dir }}/shared/volumes/certs"
         - "{{ service_containers_dir }}/haproxy-ingress/volumes/config"
         - "{{ service_containers_dir }}/scanner-app/volumes/config"
+        #- "{{ service_containers_dir }}/lab-chronyd/volumes/chrony"
+        #- "{{ service_containers_dir }}/lab-chronyd/config"
+
+    - name: Set permissionss on shared directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        mode: 0755
+        state: directory
+      loop:
+        - "/opt/dropbox"
+        - "/opt/job-codes"
+        - "/opt/job-codes/claims"
+        - "/opt/registry"
+
+    - name: Make the registry htpasswd file
+      ansible.builtin.copy:
+        content: "{{ mirror_htpasswd }}"
+        dest: "{{ service_containers_dir }}/shared/volumes/certs/registry.htpasswd"
+
+    - name: Make the registry pull secret file
+      ansible.builtin.copy:
+        content: "{{ mirror_pull_secret }}"
+        dest: "{{ service_containers_dir }}/shared/volumes/certs/pull-secret.json"
+
+    - name: Copy the root cert to the web dropbox
+      ansible.builtin.copy:
+        src: "{{ root_ca_cert_file_path }}"
+        dest: "/opt/dropbox/root-ca.pem"
+
+    - name: Copy the root cert to the web dropbox in crt format
+      ansible.builtin.copy:
+        src: "{{ root_ca_cert_file_path }}"
+        dest: "/opt/dropbox/root-ca.crt"
+
+    - name: Template chronyd config
+      ansible.builtin.template:
+        src: "templates/chrony.conf.j2"
+        dest: "/etc/chrony.conf"
+        backup: yes
+      register: chrony_conf
+
+    - name: Restart the chronyd service
+      when: chrony_conf.changed
+      ansible.builtin.systemd:
+        name: chronyd
+        state: restarted
+        enabled: yes
 
     - name: Template the scanner app config
       ansible.builtin.template:
@@ -278,3 +386,18 @@
       loop: "{{ services }}"
       loop_control:
         loop_var: service
+
+    - name: Pull and push containers
+      ansible.builtin.shell: |
+        podman tag {{ item }} {{ item | replace('quay.io', 'registry.apps.kemo.edge') | replace('docker.io', 'registry.apps.kemo.edge') }}
+        podman push --authfile {{ service_containers_dir }}/shared/volumes/certs/pull-secret.json {{ item | replace('quay.io', 'registry.apps.kemo.edge') | replace('docker.io', 'registry.apps.kemo.edge') }}
+      loop:
+      - "{{ haproxyContainer }}"
+      - "{{ nginxContainer }}"
+      - "{{ registryContainer }}"
+      - "{{ jobCodeWebContainer }}"
+      - "{{ jobCodeAPIContainer }}"
+      - "{{ scannerAppContainer }}"
+      - "{{ unifiedAPIContainer }}"
+      - "{{ glueServiceContainer }}"
+      - "{{ ntpContainer }}"
