@@ -11,15 +11,21 @@ dependencies:
 
 images:
   base_image:
-    name: registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest
+    #name: registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest
+    name: quay.io/centos/centos:stream9
 
-options:
-  package_manager_path: /usr/bin/microdnf
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
+
+#options:
+#  package_manager_path: /usr/bin/microdnf
 
 additional_build_files:
   - src: ansible.cfg
     dest: configs
 
 additional_build_steps:
+  prepend_final: |
+    RUN dnf install -y 'dnf-command(config-manager)' && rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && /usr/bin/crb enable && dnf update -y && dnf install git -y && dnf clean all && ansible --version
   prepend_galaxy:
     - COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
