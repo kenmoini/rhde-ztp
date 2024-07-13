@@ -1,0 +1,74 @@
+cat > /opt/service-containers/go-zones/scripts/servicectl.sh << EOF
+#!/bin/bash
+
+set -x
+
+###################################################################################
+# VARIABLES
+###################################################################################
+
+CONTAINER_NAME="{{ service_name }}"
+NETWORK_NAME="{{ podman_network }}"
+IP_ADDRESS="{{ dns_server_ip }}"
+CONTAINER_PORT="53"
+
+VOLUME_MOUNT_ONE="{{ service_base_dir }}/{{ service_name }}/volumes/etc-config:/etc/go-zones/"
+VOLUME_MOUNT_TWO="{{ service_base_dir }}/{{ service_name }}/volumes/vendor-config:/opt/app-root/vendor/bind/"
+
+CONTAINER_SOURCE="quay.io/kenmoini/go-zones:file-to-bind-latest"
+
+RESOURCE_LIMITS="-m 500m"
+
+###################################################################################
+# EXECUTION PREFLIGHT
+###################################################################################
+
+## Ensure there is an action arguement
+if [ -z "$1" ]; then
+  echo "Need action arguement of 'start', 'restart', or 'stop'!"
+  echo "${0} start|stop|restart"
+  exit 1
+fi
+
+
+################################################################################### SERVICE ACTION SWITCH
+case $1 in
+
+  ################################################################################# RESTART/STOP SERVICE
+  "restart" | "stop" | "start")
+    echo "Stopping container services if running..."
+
+    echo "Killing ${CONTAINER_NAME} container..."
+    /usr/bin/podman kill ${CONTAINER_NAME}
+
+    echo "Removing ${CONTAINER_NAME} container..."
+    /usr/bin/podman rm -f -i ${CONTAINER_NAME}
+    ;;
+
+esac
+
+case $1 in
+
+  ################################################################################# RESTART/START SERVICE
+  "restart" | "start")
+    sleep 3
+
+    echo "Checking for stale network lock file..."
+    FILE_CHECK="/var/lib/cni/networks/${NETWORK_NAME}/${IP_ADDRESS}"
+    if [[ -f "$FILE_CHECK" ]]; then
+        rm -f $FILE_CHECK
+    fi
+
+    echo "Starting container services..."
+
+    # Deploy ${CONTAINER_NAME} container
+    echo -e "Deploying ${CONTAINER_NAME}...\n"
+
+    /usr/bin/podman run -d --name "${CONTAINER_NAME}" --privileged \\
+      --network "${NETWORK_NAME}" --ip "${IP_ADDRESS}" -p "${CONTAINER_PORT}" \\
+      -v ${VOLUME_MOUNT_ONE} -v ${VOLUME_MOUNT_TWO} \\
+      ${RESOURCE_LIMITS} ${CONTAINER_SOURCE}
+
+    ;;
+
+esac

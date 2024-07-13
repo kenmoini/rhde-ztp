@@ -1,0 +1,74 @@
+dns:
+  ##########################################################################################
+  # acls is a list of named network groups
+  acls:
+    # privatenets can respond to internal client queries with an internal IP
+    - name: privatenets
+      networks:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - localhost
+        - localnets
+    # externalwan would match any external network
+    - name: externalwan
+      networks:
+        - any
+        - "!10.0.0.0/8"
+        - "!172.16.0.0/12"
+        - "!192.168.0.0/16"
+        - "!localhost"
+        - "!localnets"
+
+  ##########################################################################################
+  # views is a list of named views that glue together acls and zones
+  views:
+    - name: internalNetworks
+      # acls is a list of the named ACLs from above that this view will be applied to
+      acls:
+        - privatenets
+      # recursion is a boolean that controls whether this view will allow recursive DNS queries
+      recursion: {{ 'true' if upstream_dns_servers is defined else 'false' }}
+      # if recursion is true, then you can provide forwarders to be used for recursive queries 
+      #  such as a PiHole DNS server or just something like Cloudflare DNS at 1.0.0.1 and 1.1.1.1
+      forwarders:
+{% for server in upstream_dns_servers %}
+        - {{ server }}
+{% endfor %}
+      # forwarded_zones is a list of zones and their authoritative nameservers to forward queries to
+{% if forwarded_zones is defined %}
+      forwarded_zones:
+{% for zone in forwarded_zones %}
+        - zone: {{ zone.zone }}
+          forwarders:
+{% for server in zone.forwarders %}
+            - {{ server }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+      # zones is a list of named Zones to associate with this view
+      zones:
+        - {{ base_domain_zone | replace('.', '-') }}
+
+
+  ##########################################################################################
+  zones:
+    - name: {{ base_domain_zone | replace('.', '-') }}
+      zone: {{ base_domain_zone }}
+      primary_dns_server: {{ dns_server_name }}.{{ base_domain_zone }}
+      default_ttl: 3600
+      records:
+        NS:
+          - name: {{ dns_server_name }}
+            ttl: 86400
+            domain: {{ base_domain_zone }}.
+            anchor: '@'
+        A:
+          # a cidr suffix will generate PTR records
+          - name: {{ dns_server_name }}
+            value: {{ dns_server_ip }}/24
+{% for record in ARecords %}
+          - name: {{ record.name }}
+            value: {{ record.value }}
+{% endfor %}
+

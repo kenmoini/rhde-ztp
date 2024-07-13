@@ -1,0 +1,112 @@
+---
+- name: Setup DNS Service with GoZones
+  hosts: edgehub
+  become: yes
+
+  vars:
+    base_domain_zone: kemo.edge
+    dns_server_name: ns1
+    dns_server_ip: 192.168.99.2
+    service_name: go-zones
+    podman_network: lanBridge
+
+    # Where to forward other DNS queries
+    upstream_dns_servers:
+      - 1.1.1.1
+      - 1.0.0.1
+
+    # Optional DNS specific zone forwarders
+    forwarded_zones:
+      - zone: kemo.labs
+        forwarders:
+          - 192.168.42.9
+          - 192.168.42.10
+      - zone: kemo.network
+        forwarders:
+          - 192.168.42.9
+          - 192.168.42.10
+
+    ARecords:
+      # a cidr suffix will generate PTR records
+      - name: edge-router
+        value: 192.168.99.1/24
+      - name: edge-hub
+        value: 192.168.99.10/24
+      - name: pxe
+        value: 192.168.99.10
+      - name: image-builder
+        value: 192.168.99.10
+      - name: fdo-aio
+        value: 192.168.99.10
+      - name: aap2-controller
+        value: 192.168.99.11/24
+      - name: websrv
+        value: 192.168.99.12/24
+      - name: ocr-app
+        value: 192.168.99.13/24
+      - name: unified-api
+        value: 192.168.99.14/24
+      - name: scanner-app
+        value: 192.168.99.15/24
+      - name: "*.apps"
+        value: 192.168.99.16
+      - name: job-code-web
+        value: 192.168.99.17/24
+      - name: registry
+        value: 192.168.99.18/24
+
+    # ========================================================================
+    # No need to edit these really
+    service_base_dir: /opt/service-containers
+
+  tasks:
+    - name: Create the service directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ service_base_dir }}/{{ service_name }}/scripts"
+        - "{{ service_base_dir }}/{{ service_name }}/volumes/etc-config"
+        - "{{ service_base_dir }}/{{ service_name }}/volumes/vendor-config"
+
+    - name: Template the service init script
+      ansible.builtin.template:
+        src: templates/setup-dns-server/servicectl.sh.j2
+        dest: "{{ service_base_dir }}/{{ service_name }}/scripts/servicectl.sh"
+        mode: 0755
+
+    - name: Template the bind configuration file
+      ansible.builtin.template:
+        src: templates/setup-dns-server/named.conf.j2
+        dest: "{{ service_base_dir }}/{{ service_name }}/volumes/vendor-config/named.conf"
+        mode: 0644
+
+    - name: Template the GoZones configuration file
+      ansible.builtin.template:
+        src: templates/setup-dns-server/go-zones.conf.j2
+        dest: "{{ service_base_dir }}/{{ service_name }}/volumes/etc-config/server.conf"
+        mode: 0644
+
+    - name: Template the systemd unit file
+      ansible.builtin.template:
+        src: templates/setup-dns-server/service.j2
+        dest: /etc/systemd/system/{{ service_name }}.service
+        mode: 0644
+        owner: root
+        group: root
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Pre-pull the image
+      containers.podman.podman_image:
+        name: quay.io/kenmoini/go-zones:file-to-bind-latest
+        pull: yes
+        force: yes
+
+    - name: Start and enable the service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        state: started
+        enabled: yes
