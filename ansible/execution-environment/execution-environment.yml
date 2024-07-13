@@ -33,7 +33,8 @@ additional_build_steps:
     && /usr/bin/crb enable \
     && dnf install -y https://packages.microsoft.com/config/rhel/9.0/packages-microsoft-prod.rpm \
     && dnf update -y && dnf install git azure-cli -y && dnf clean all && ansible --version \
-    && az extension add --name connectedk8s
+    && az extension add --name connectedk8s \
+    && az extension add --name k8s-configuration
   prepend_galaxy:
     - COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
     - RUN dnf install -y git && dnf clean all
