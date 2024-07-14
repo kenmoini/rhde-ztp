@@ -330,6 +330,14 @@
 
  </div>
 <script type="text/javascript">
+    // Preload the JobCode if available from the link
+    const params = new URL(window.location.href).searchParams;
+    if (params.has("jobCode")) {
+        console.log("Job Code: " + params.get("jobCode"));
+        const jobCode = params.get("jobCode");
+        document.getElementById('jobCode').value = jobCode;
+    }
+
     const submitJobCodeButton = document.getElementById('sendJobCode');
     submitJobCodeButton.addEventListener('click', processJobCode);
 
