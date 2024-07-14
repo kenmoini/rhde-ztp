@@ -164,8 +164,7 @@ def sendJobCode():
             sid = sendTextMessage(toNumber, txtMsgBody)
 
         # Return the JSON message
-        print(sid)
-        return json.dumps(sid)
+        return json.dumps({"status": "success", "sid": sid.sid})
 
 ####################################################################################################
 # Create a new Job Code Claim
