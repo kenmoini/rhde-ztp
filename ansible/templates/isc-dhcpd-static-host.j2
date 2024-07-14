@@ -1,0 +1,8 @@
+host {{ hostname }} {
+  hardware ethernet {{ mac_address_lower }};
+  fixed-address {{ ip_address }};
+  option host-name "{{ hostname }}";
+{% if domain is defined %}
+  option domain-name "{{ domain }}";
+{% endif %}
+}

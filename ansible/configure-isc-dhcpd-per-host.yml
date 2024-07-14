@@ -1,0 +1,45 @@
+---
+- name: Configure ISC DHCPD for Per-host Static Configuration
+  hosts: dhcpd
+  gather_facts: false
+  become: true
+
+  vars:
+    #mac_address: "" # This is provided by an input variable
+    #ip_address: "" # This is provided by an input variable
+    #hostname: "" # This is provided by an input variable
+    #domain: "" # This is provided by an input variable
+    mac_address_lower: "{{ mac_address | lower }}"
+    mac_address_lower_dashes: "{{ mac_address_lower | regex_replace(':', '-') }}"
+
+  tasks:
+    - name: Ensure the target directory exists
+      ansible.builtin.file:
+        path: /etc/dhcp/static-hosts
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Template per-host configuration file
+      ansible.builtin.template:
+        src: templates/isc-dhcpd-static-host.j2
+        dest: /etc/dhcp/static-hosts/{{ mac_address_lower_dashes }}.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: reload dhcpd
+
+    - name: Configure the main DHCPD service configuration file
+      ansible.builtin.lineinfile:
+        path: /etc/dhcp/dhcpd.conf
+        line: "include \"/etc/dhcp/static-hosts/{{ mac_address_lower_dashes }}.conf\";"
+        backup: true
+        insertafter: EOF
+
+  handlers:
+    - name: reload dhcpd
+      ansible.builtin.systemd:
+        name: dhcpd
+        state: restarted
+        enabled: true
