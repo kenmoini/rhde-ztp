@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from http.client import HTTPConnection
 from twilio.rest import Client
+import smtplib
+from email.mime.text import MIMEText
 
 # job-code-app imported functions
 log = logging.getLogger('urllib3')
@@ -59,6 +61,21 @@ def sendTextMessage(toNumber, msgBody):
         to=toNumber
     )
     return message
+
+##############################
+# Send an email with SMTP
+def send_email(subject, body, recipients):
+    sender = os.environ.get("SMTP_FROM_ADDRESS", "")
+    password = os.environ.get("SMTP_PASSWORD", "")
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    return "Message sent!"
 
 ##############################
 # creates a Flask application
@@ -155,16 +172,27 @@ def sendJobCode():
         # Get the JSON data from the request
         jobCodeData = request.get_json()
 
-        toNumber = "+1" + jobCodeData['phone']
         jobCode = jobCodeData['jobCode']
+
+        emailAddress = jobCodeData['email']
+        subject = "Notice: New Job Code Assignment"
+        body = "Hello - you have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
+        recipients = [emailAddress]
+
+        toNumber = "+1" + jobCodeData['phone']
         txtMsgBody = "You have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
         
         # Send the text message
         if toNumber != "":
             sid = sendTextMessage(toNumber, txtMsgBody)
+            # Return the JSON message
+            return json.dumps({"status": "success", "sid": sid.sid})
 
-        # Return the JSON message
-        return json.dumps({"status": "success", "sid": sid.sid})
+        if emailAddress != "":
+            # Send the email
+            msg = send_email(subject, body, recipients)
+            # Return the JSON message
+            return json.dumps({"status": "success", "message": msg})
 
 ####################################################################################################
 # Create a new Job Code Claim
