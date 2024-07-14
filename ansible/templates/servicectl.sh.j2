@@ -37,6 +37,12 @@ EXTRA_ARGS="{% for arg in service.extra_args %}{{ arg }} {% endfor %}"
 EXTRA_ARGS=""
 {% endif %}
 
+{% if service.env_files is defined %}
+ENV_FILES="{% for env_file in service.env_files %}--env-file {{ env_file }} {% endfor %}"
+{% else %}
+ENV_FILES=""
+{% endif %}
+
 {% if service.resources.memory is defined %}
 RESOURCE_LIMITS="-m {{ service.resources.memory }}"
 {% else %}
@@ -93,6 +99,7 @@ case $1 in
       ${ENV_VARS} \
       ${VOLUMES} \
       ${EXTRA_ARGS} \
+      ${ENV_FILES} \
       ${RESOURCE_LIMITS} ${CONTAINER_SOURCE}
 
     ;;

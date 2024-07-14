@@ -26,8 +26,8 @@
 
     aap2_controller_url: "https://aap2-controller.{{ base_domain }}"
     aap2_controller_token: LmcwokPirudGDMBJWYgxNj5RkVW2iE
-    aap2_rhde_inventory_id: 2
-    aap2_rhde_infrastructure_inventory_id: 3
+    aap2_rhde_inventory_id: 3
+    aap2_rhde_infrastructure_inventory_id: 4
     aap2_glue_job_template_id: 9
     aap2_update_pxe_job_template_id: 7
 
@@ -95,6 +95,8 @@
             container_path: "/etc/pki/tls:ro"
         resources:
           memory: 512m
+        env_files:
+          - "{{ service_containers_dir }}/shared/volumes/secrets/twilio.env"
         env:
         - name: "JOB_CODES_DIR"
           value: "/opt/job-codes"
@@ -184,8 +186,8 @@
             container_path: /usr/share/nginx/html/dropbox
           - host_path: /opt/ostree
             container_path: /usr/share/nginx/html/ostree
-          - host_path: /opt/ostree
-            container_path: /usr/share/nginx/html/ostree
+          - host_path: "{{ service_containers_dir }}/nginx-websrv/volumes/config/conf.d"
+            container_path: /etc/nginx/conf.d:ro
 
       - name: registry
         image: "{{ registryContainer }}"
@@ -282,6 +284,7 @@
         - "{{ haproxyContainer }}"
         - "{{ nginxContainer }}"
         - "{{ registryContainer }}"
+        - quay.io/kenmoini/rhde-ztp-ee:latest
         #- "{{ jobCodeAPIContainer }}"
         #- "{{ glueServiceContainer }}"
         #- "{{ ntpContainer }}"
@@ -325,8 +328,10 @@
         - "/opt/ostree"
         - "/opt/registry"
         - "{{ service_containers_dir }}/shared/volumes/certs"
+        - "{{ service_containers_dir }}/shared/volumes/secrets"
         - "{{ service_containers_dir }}/haproxy-ingress/volumes/config"
         - "{{ service_containers_dir }}/scanner-app/volumes/config"
+        - "{{ service_containers_dir }}/nginx-websrv/volumes/config/conf.d"
         #- "{{ service_containers_dir }}/lab-chronyd/volumes/chrony"
         #- "{{ service_containers_dir }}/lab-chronyd/config"
 
@@ -395,6 +400,11 @@
         src: "templates/crt-list.cfg.j2"
         dest: "{{ service_containers_dir }}/haproxy-ingress/volumes/config/crt-list.cfg"
 
+    - name: Template nginx default config
+      ansible.builtin.template:
+        src: "templates/nginx.default.conf.j2"
+        dest: "{{ service_containers_dir }}/nginx-websrv/volumes/config/conf.d/default.conf"
+
     - name: Create the container init scripts
       ansible.builtin.template:
         src: "templates/servicectl.sh.j2"
@@ -417,6 +427,10 @@
       loop_control:
         loop_var: service
 
+    - name: Make sure all files are readable
+      ansible.builtin.shell: |
+        chmod -R a+r /var/ftp/pub/pxe/tftpboot/
+
     - name: Pull and push containers
       ansible.builtin.shell: |
         podman tag {{ item }} {{ item | replace('quay.io', 'registry.apps.'+ base_domain) | replace('docker.io', 'registry.apps.' + base_domain) }}
@@ -428,7 +442,7 @@
       - "{{ jobCodeWebContainer }}"
       - "{{ scannerAppContainer }}"
       - "{{ unifiedAPIContainer }}"
-      - "{{ ntpContainer }}"
       - quay.io/kenmoini/rhde-ztp-ee:latest
+      #- "{{ ntpContainer }}"
       #- "{{ glueServiceContainer }}"
       #- "{{ jobCodeAPIContainer }}"
