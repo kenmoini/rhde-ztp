@@ -8,6 +8,11 @@
   hosts: buildserver
   become: yes
   vars:
+    # Site configs can store all these specific variables in a more Git-friendly way
+    use_site_configs: false
+    site_config_name: minimal-rhel94
+    site_config_path: "{{ playbook_dir }}/site-configs/rhde-images"
+
     create_blueprints: true
     create_image: true
     extract_image: true
@@ -32,12 +37,11 @@
     image_description: "Blueprint for building the RHDE image with Microshift preloaded"
 
     architecture: x86_64
-    #target_iso_path: "/var/ftp/pub/pxe/install/{{ architecture }}/{{ image_name | replace('-', '') }}/iso"
     target_iso_path: /opt/isos
     target_repo_path: /opt/ostree
-    image_builder_endpoint: "http://192.168.99.12/ostree/repo"
-    #image_builder_ref: rhel/8/x86_64/edge
-    image_builder_ref: rhel/9/x86_64/edge
+    ostree_mirror_url: "http://192.168.99.12/ostree/repo"
+    #ostree_image_ref: rhel/8/x86_64/edge
+    ostree_image_ref: rhel/9/x86_64/edge
 
     fdo_manufacturing_server_url:  "http://192.168.99.10:8080"
 
@@ -100,6 +104,18 @@
             - "169.254.169.1"
 
   tasks:
+    - name: SITECONFIG - Read in site configs
+      when:
+        - use_site_configs | bool
+        - site_config_name is defined
+      ansible.builtin.include_vars:
+        dir: "site-configs/rhde-images/{{ site_config_name }}"
+        extensions:
+          - 'yaml'
+          - 'yml'
+      tags:
+        - always
+
     - name: Create blueprints
       when: create_blueprints
       block:
@@ -120,8 +136,8 @@
             blueprint: "{{ image_name }}"
             compose_type: "{{ compose_type }}"
             #size: "{{ image_size | default(omit) }}"
-            ostree_url: "{{ image_builder_endpoint if compose_type == 'edge-simplified-installer' else omit }}"
-            ostree_ref: "{{ image_builder_ref if compose_type == 'edge-simplified-installer' else omit }}"
+            ostree_url: "{{ ostree_mirror_url if compose_type == 'edge-simplified-installer' else omit }}"
+            ostree_ref: "{{ ostree_image_ref if compose_type == 'edge-simplified-installer' else omit }}"
           register: builder_compose_start_out
 
         - name: Wait for compose

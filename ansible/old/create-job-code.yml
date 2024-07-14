@@ -1,3 +1,5 @@
+---
+# This is not used any more - this is handled by the Job Code Web App and Unified API
 - name: Create Job Code Configuration
   hosts: configserver
 

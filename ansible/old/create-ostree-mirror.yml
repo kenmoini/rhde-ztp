@@ -1,4 +1,5 @@
 ---
+# This actually isn't used or complete since the ostree mirror processes are part of the create-blueprints.yml playbook
 - name: Create an OSTree Repo
   hosts: ostreemirror
   become: yes

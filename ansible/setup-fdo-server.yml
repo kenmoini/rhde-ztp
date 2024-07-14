@@ -2,6 +2,9 @@
 # https://github.com/osbuild/rhel-for-edge-demo/tree/master/fdo
 # https://www.youtube.com/watch?v=_nq5IAVbl2Y
 # https://github.com/fdo-rs/fido-device-onboard-rs/blob/main/HOWTO.md
+# https://developers.redhat.com/articles/2023/07/10/automate-edge-device-onboarding-ansible-fdo-collection#
+# https://www.redhat.com/sysadmin/edge-device-onboarding-fdo
+
 - name: Setup FDO AIO
   hosts: fdoserver
   become: yes

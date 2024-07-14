@@ -22,7 +22,17 @@
     lvm_device: /dev/sdb
     lvm_vg_name: mshift
 
+    connect_to_azure_arc: true
+    azureResourceGroup: AzureArcTest
+
   tasks:
+
+    - name: Include vaulted variables
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - vault-vars/azure-sp.yml
+        - vault-vars/microshift-pull-secret.yml
 
     - name: Wait for the system to come online in case it just rebooted
       ansible.builtin.wait_for_connection:
@@ -167,11 +177,6 @@
         group: "{{ ansible_env.USER }}"
         mode: 0600
 
-    - name: Disable the Glue Service
-      ansible.builtin.systemd:
-        name: fdo-ansible-glue
-        enabled: false
-
     #- name: Read in the ServiceAccount Secret
     #  kubernetes.core.k8s_info:
     #    api_version: v1
@@ -180,4 +185,15 @@
     #    name: ext-cluster-importer-sa-token
     #  register: serviceaccount_secret
 
-    #- name: Connect to Azure Arc
+    - name: Connect to Azure Arc
+      ansible.builtin.shell:
+        cmd: |
+          az login --service-principal -u "{{ azureServicePrincipalID }}" -p "{{ azureServicePrincipalClientSecret }}" --tenant "{{ azureTenantID }}"
+          az connectedk8s connect --name "{{ microshift_hostname }}" \
+            --resource-group "{{ azureResourceGroup }}" \
+            --kube-config /var/lib/microshift/resources/kubeadmin/api.{{ microshift_hostname }}.{{ microshift_base_domain }}/kubeconfig
+
+    - name: Disable the Glue Service
+      ansible.builtin.systemd:
+        name: fdo-ansible-glue
+        enabled: false

@@ -4,10 +4,46 @@
   become: yes
 
   vars:
-    # These two aren't needed any more
-    glueServiceContainer: quay.io/kenmoini/fdo-ansible-glue:latest
-    jobCodeAPIContainer: quay.io/kenmoini/job-code-api:latest
+    # ========================================================================
+    # MANDATORY vars to change in your environment
+    base_domain: kemo.edge
+    unified_api_endpoint: "https://unified-api.apps.{{ base_domain }}"
+    haproxy_dns_server: 192.168.99.2
 
+    # Podman Networking things
+    # Podman bridge must already be set up
+    podman_bridge_name: lanBridge
+    unified_api_ip_address: 192.168.99.14
+    scanner_app_ip_address: 192.168.99.15
+    job_code_web_ip_address: 192.168.99.17
+    haproxy_ingress_ip_address: 192.168.99.16
+    nginx_websrv_ip_address: 192.168.99.12
+    registry_ip_address: 192.168.99.18
+
+    # Create a PKI first with the scripts in the pki-the-hard-way directory
+    root_ca_cert_file_path: ../pki-the-hard-way/.pki/root-ca/public_bundles/certs/kemo-labs-certificate-authority.cert.pem
+    wildcard_cert_file_path: "../pki-the-hard-way/.pki/root-ca/intermediates/kemo-labs-intermediate-certificate-authority/signing/kemo-labs-edge-sca/certs/bundle_haproxy-edge-hub.{{ base_domain }}.cert.pem"
+
+    aap2_controller_url: "https://aap2-controller.{{ base_domain }}"
+    aap2_controller_token: LmcwokPirudGDMBJWYgxNj5RkVW2iE
+    aap2_rhde_inventory_id: 2
+    aap2_rhde_infrastructure_inventory_id: 3
+    aap2_glue_job_template_id: 9
+    aap2_update_pxe_job_template_id: 7
+
+    # ========================================================================
+    # Optional vars to change in your environment
+    mirror_htpasswd: |
+      # mirrormirror / Passw0rd123
+      mirrormirror:$2y$05$RQPTU52YU9MUUzt0p6/qg.OowR0msnkz8hzvnU7WnYZzDu5HlktjK
+
+    mirror_pull_secret: "{\"auths\": {\"registry.apps.{{ base_domain }}\": {\"auth\": \"bWlycm9ybWlycm9yOlBhc3N3MHJkMTIz\"}}}"
+
+    # ========================================================================
+    # No need to really change much under here
+    # These two containers aren't needed any more - but keep em around anyway
+    #glueServiceContainer: quay.io/kenmoini/fdo-ansible-glue:latest
+    #jobCodeAPIContainer: quay.io/kenmoini/job-code-api:latest
     jobCodeWebContainer: quay.io/kenmoini/job-code-web:latest
     scannerAppContainer: quay.io/kenmoini/scanner-app:latest
     unifiedAPIContainer: quay.io/kenmoini/ztp-edge-unified-api:latest
@@ -16,48 +52,36 @@
     registryContainer: docker.io/library/registry:2
     ntpContainer: docker.io/publicarray/chrony:latest
 
-    #root_ca_cert_file_path: /etc/pki/ca-trust/source/anchors/ca.pem
-    root_ca_cert_file_path: ../pki-the-hard-way/.pki/root-ca/public_bundles/certs/kemo-labs-certificate-authority.cert.pem
-
     service_containers_dir: /opt/service-containers
-    unified_api_endpoint: "https://unified-api.apps.kemo.edge"
-
-    haproxy_dns_server: 192.168.99.2
-
-    mirror_htpasswd: |
-      # mirrormirror / Passw0rd123
-      mirrormirror:$2y$05$RQPTU52YU9MUUzt0p6/qg.OowR0msnkz8hzvnU7WnYZzDu5HlktjK
-
-    mirror_pull_secret: '{"auths": {"registry.apps.kemo.edge": {"auth": "bWlycm9ybWlycm9yOlBhc3N3MHJkMTIz"}}}'
 
     haproxy_endpoints:
       - name: unified_api
-        domain: unified-api.apps.kemo.edge
-        ip: unified-api.kemo.edge
+        domain: "unified-api.apps.{{ base_domain }}"
+        ip: "unified-api.{{ base_domain }}"
         port: 9876
       - name: scanner_app
-        domain: scanner-app.apps.kemo.edge
-        ip: scanner-app.kemo.edge
+        domain: "scanner-app.apps.{{ base_domain }}"
+        ip: "scanner-app.{{ base_domain }}"
         port: 8080
       - name: job_code_web
-        domain: job-code-manager.apps.kemo.edge
-        ip: job-code-web.kemo.edge
+        domain: "job-code-manager.apps.{{ base_domain }}"
+        ip: "job-code-web.{{ base_domain }}"
         port: 8501
       - name: nginx_websrv
-        domain: websrv.apps.kemo.edge
-        ip: websrv.kemo.edge
+        domain: "websrv.apps.{{ base_domain }}"
+        ip: "websrv.{{ base_domain }}"
         port: 80
       - name: registry
-        domain: registry.apps.kemo.edge
-        ip: registry.kemo.edge
+        domain: "registry.apps.{{ base_domain }}"
+        ip: "registry.{{ base_domain }}"
         port: 5000
 
     services:
       - name: unified-api
         image: "{{ unifiedAPIContainer }}"
         network:
-          name: lanBridge
-          ip: 192.168.99.14
+          name: "{{ podman_bridge_name }}"
+          ip: "{{ unified_api_ip_address }}"
           ports:
             - 9876
         volumes:
@@ -77,23 +101,23 @@
         - name: "ISO_DIR"
           value: "/opt/isos"
         - name: AAP_CONTROLLER_URL
-          value: "https://aap2-controller.kemo.edge"
+          value: "{{ aap2_controller_url }}"
         - name: AAP_CONTROLLER_TOKEN
-          value: LmcwokPirudGDMBJWYgxNj5RkVW2iE
-        - name: AAP_GLUE_JOB_TEMPLATE_ID
-          value: 9
+          value: "{{ aap2_controller_token }}"
         - name: AAP_INVENTORY_ID
-          value: 2
+          value: "{{ aap2_rhde_inventory_id }}"
         - name: AAP_GLUE_INVENTORY_ID
-          value: 2
+          value: "{{ aap2_rhde_inventory_id }}"
+        - name: AAP_GLUE_JOB_TEMPLATE_ID
+          value: "{{ aap2_glue_job_template_id }}"
         - name: AAP_UPDATE_PXE_JOB_TEMPLATE_ID
-          value: 7
+          value: "{{ aap2_update_pxe_job_template_id }}"
 
       - name: scanner-app
         image: "{{ scannerAppContainer }}"
         network:
-          name: lanBridge
-          ip: 192.168.99.15
+          name: "{{ podman_bridge_name }}"
+          ip: "{{ scanner_app_ip_address }}"
           ports:
             - 8080
         resources:
@@ -109,15 +133,15 @@
       - name: job-code-web
         image: "{{ jobCodeWebContainer }}"
         network:
-          name: lanBridge
-          ip: 192.168.99.17
+          name: "{{ podman_bridge_name }}"
+          ip: "{{ job_code_web_ip_address}}"
           ports:
             - 8501
         resources:
           memory: 512m
         env:
           - name: "BACKEND_API"
-            value: "https://unified-api.apps.kemo.edge"
+            value: "https://unified-api.apps.{{ base_domain }}"
         volumes:
           - host_path: "/etc/pki/ca-trust/extracted"
             container_path: "/etc/pki/ca-trust/extracted:ro"
@@ -127,11 +151,13 @@
       - name: haproxy-ingress
         image: "{{ haproxyContainer }}"
         network:
-          name: lanBridge
-          ip: 192.168.99.16
+          name: "{{ podman_bridge_name }}"
+          ip: "{{ haproxy_ingress_ip_address }}"
           ports:
             - 80
             - 443
+        resources:
+          memory: 512m
         volumes:
           - host_path: "{{ service_containers_dir }}/haproxy-ingress/volumes/config"
             container_path: "/usr/local/etc/haproxy:ro"
@@ -143,10 +169,12 @@
       - name: nginx-websrv
         image: "{{ nginxContainer }}"
         network:
-          name: lanBridge
-          ip: 192.168.99.12
+          name: "{{ podman_bridge_name }}"
+          ip: "{{ nginx_websrv_ip_address }}"
           ports:
             - 80
+        resources:
+          memory: 512m
         volumes:
           - host_path: /opt/isos
             container_path: /usr/share/nginx/html/isos
@@ -162,10 +190,12 @@
       - name: registry
         image: "{{ registryContainer }}"
         network:
-          name: lanBridge
-          ip: 192.168.99.18
+          name: "{{ podman_bridge_name }}"
+          ip: "{{ registry_ip_address }}"
           ports:
             - 5000
+        resources:
+          memory: 512m
         env:
           - name: REGISTRY_HTTP_SECRET
             value: "/auth/registry.htpasswd"
@@ -246,15 +276,15 @@
         pull: yes
         force: yes
       loop:
-        - "{{ glueServiceContainer }}"
-        - "{{ jobCodeAPIContainer }}"
         - "{{ jobCodeWebContainer }}"
         - "{{ scannerAppContainer }}"
         - "{{ unifiedAPIContainer }}"
         - "{{ haproxyContainer }}"
         - "{{ nginxContainer }}"
         - "{{ registryContainer }}"
-        # - "{{ ntpContainer }}"
+        #- "{{ jobCodeAPIContainer }}"
+        #- "{{ glueServiceContainer }}"
+        #- "{{ ntpContainer }}"
       loop_control:
         loop_var: container_image
 
@@ -352,7 +382,7 @@
 
     - name: Copy the wildcard certificate to the host
       ansible.builtin.copy:
-        src: "../pki-the-hard-way/.pki/root-ca/intermediates/kemo-labs-intermediate-certificate-authority/signing/kemo-labs-edge-sca/certs/bundle_haproxy-edge-hub.kemo.edge.cert.pem"
+        src: "{{ wildcard_cert_file_path }}"
         dest: "{{ service_containers_dir }}/shared/volumes/certs/haproxy_wildcard.pem"
 
     - name: Template the HAProxy config file over
@@ -389,15 +419,16 @@
 
     - name: Pull and push containers
       ansible.builtin.shell: |
-        podman tag {{ item }} {{ item | replace('quay.io', 'registry.apps.kemo.edge') | replace('docker.io', 'registry.apps.kemo.edge') }}
-        podman push --authfile {{ service_containers_dir }}/shared/volumes/certs/pull-secret.json {{ item | replace('quay.io', 'registry.apps.kemo.edge') | replace('docker.io', 'registry.apps.kemo.edge') }}
+        podman tag {{ item }} {{ item | replace('quay.io', 'registry.apps.'+ base_domain) | replace('docker.io', 'registry.apps.' + base_domain) }}
+        podman push --authfile {{ service_containers_dir }}/shared/volumes/certs/pull-secret.json {{ item | replace('quay.io', 'registry.apps.' + base_domain) | replace('docker.io', 'registry.apps.' + base_domain) }}
       loop:
       - "{{ haproxyContainer }}"
       - "{{ nginxContainer }}"
       - "{{ registryContainer }}"
       - "{{ jobCodeWebContainer }}"
-      - "{{ jobCodeAPIContainer }}"
       - "{{ scannerAppContainer }}"
       - "{{ unifiedAPIContainer }}"
-      - "{{ glueServiceContainer }}"
       - "{{ ntpContainer }}"
+      - quay.io/kenmoini/rhde-ztp-ee:latest
+      #- "{{ glueServiceContainer }}"
+      #- "{{ jobCodeAPIContainer }}"
