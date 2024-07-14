@@ -17,7 +17,7 @@
 
     pxe_tftp_path: /var/ftp/pub/pxe/tftpboot
     # eg /var/ftp/pub/pxe/install/x86_64/rhel94/ext
-    target_iso_ext_path: /var/ftp/pub/pxe/install/{{ architecture }}/{{ distro_key }}/ext
+    target_iso_ext_path: "/var/ftp/pub/pxe/install/{{ architecture }}/{{ distro_key }}/ext"
     # eg /var/ftp/pub/pxe/tftpboot/EFI/x86_64/rhel94/rhel94x8664
     target_pxe_path: "{{ pxe_tftp_path }}/{{ boot_protocol }}/{{ architecture }}/{{ distro_key }}/{{ iso_base_name }}"
 
