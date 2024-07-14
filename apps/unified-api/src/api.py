@@ -155,7 +155,7 @@ def sendJobCode():
         # Get the JSON data from the request
         jobCodeData = request.get_json()
 
-        toNumber = jobCodeData['phone']
+        toNumber = "+1" + jobCodeData['phone']
         jobCode = jobCodeData['jobCode']
         txtMsgBody = "You have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
         
