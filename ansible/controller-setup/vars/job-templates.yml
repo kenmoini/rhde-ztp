@@ -1,6 +1,7 @@
 ---
 controller_templates:
   - name: Setup DNS Server
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
@@ -11,6 +12,7 @@ controller_templates:
       - RHDEMGMT
 
   - name: Setup FDO Server
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
@@ -21,6 +23,7 @@ controller_templates:
       - RHDEMGMT
 
   - name: Setup Image Builder Server
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
@@ -31,6 +34,7 @@ controller_templates:
       - RHDEMGMT
 
   - name: Extract ISO for PXE Server
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
@@ -41,6 +45,7 @@ controller_templates:
       - RHDEMGMT
 
   - name: Configure PXE Server for specific MAC Address boots
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
@@ -51,6 +56,7 @@ controller_templates:
       - RHDEMGMT
 
   - name: Deploy Microservices to Edge Hub
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
@@ -61,6 +67,7 @@ controller_templates:
       - RHDEMGMT
 
   - name: Create Blueprint and Image
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
@@ -74,13 +81,14 @@ controller_templates:
     survey: "{{ lookup('template', 'templates/create-blueprint-and-image-project_survey.json.j2') | regex_replace('\\n', '') }}"
 
   - name: Post-bootstrap RHDE Configuration
+    organization: "{{ global_organization }}"
     job_type: run
     inventory: RHDEInfrastructure
     execution_environment: rhde-ztp-edge
     project: RHDE ZTP
     playbook: ansible/post-bootstrap-config.yml
     ask_variables_on_launch: true
-    ask_limit_on_launch: true
+    ask_limit_on_launch:  true
     become_enabled: true
     credentials:
       - RHDESystems
