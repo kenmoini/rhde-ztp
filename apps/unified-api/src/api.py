@@ -179,14 +179,14 @@ def sendJobCode():
         body = "Hello - you have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
         recipients = [emailAddress]
 
-        toNumber = "+1" + jobCodeData['phone']
-        txtMsgBody = "You have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
+        #toNumber = "+1" + jobCodeData['phone']
+        #txtMsgBody = "You have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
         
         # Send the text message
-        if toNumber != "":
-            sid = sendTextMessage(toNumber, txtMsgBody)
-            # Return the JSON message
-            return json.dumps({"status": "success", "sid": sid.sid})
+        #if toNumber != "":
+        #    sid = sendTextMessage(toNumber, txtMsgBody)
+        #    # Return the JSON message
+        #    return json.dumps({"status": "success", "sid": sid.sid})
 
         if emailAddress != "":
             # Send the email
