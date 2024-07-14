@@ -41,6 +41,7 @@ controller_templates:
     project: RHDE ZTP
     playbook: ansible/extract-iso-for-pxe.yml
     become_enabled: true
+    ask_variables_on_launch: true
     credentials:
       - RHDEMGMT
 
@@ -52,6 +53,7 @@ controller_templates:
     project: RHDE ZTP
     playbook: ansible/configure-pxe-server.yml
     become_enabled: true
+    ask_variables_on_launch: true
     credentials:
       - RHDEMGMT
 

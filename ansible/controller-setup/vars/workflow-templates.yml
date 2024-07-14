@@ -35,8 +35,22 @@ controller_workflows:
           type: job_template
           organization:
             name: "{{ global_organization }}"
+        related:
+          success_nodes:
+            - workflow_job_template:
+                name: Extract ISO for PXE Server
+              identifier: extractisoforpxe
         extra_data:
           create_blueprints: "true"
           create_image: "true"
           compose_type: edge-simplified-installer
           extract_image: "true"
+      - all_parents_must_converge: false
+        identifier: extractisoforpxe
+        unified_job_template:
+          name: Extract ISO for PXE Server
+          type: job_template
+          organization:
+            name: "{{ global_organization }}"
+        extra_data:
+          iso_name: "{% raw %}{{ image_name }}{% endraw %}.iso"

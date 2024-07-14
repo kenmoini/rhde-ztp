@@ -114,6 +114,8 @@
           value: "{{ aap2_glue_job_template_id }}"
         - name: AAP_UPDATE_PXE_JOB_TEMPLATE_ID
           value: "{{ aap2_update_pxe_job_template_id }}"
+        - name: SCANNER_APP_URL
+          value: "http://scanner-app.apps.{{ base_domain }}"
 
       - name: scanner-app
         image: "{{ scannerAppContainer }}"

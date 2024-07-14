@@ -30,6 +30,12 @@
         - "{{ target_iso_ext_path }}/{{ iso_base_name }}/images/pxeboot"
         - "{{ target_pxe_path }}"
 
+    - name: Unmount the ISO if it is already mounted
+      ansible.posix.mount:
+        path: "{{ target_iso_ext_path }}/{{ iso_base_name }}"
+        state: unmounted
+      ignore_errors: yes
+
     - name: Mount the ISO to the mounting directory
       ansible.posix.mount:
         path: "{{ target_iso_ext_path }}/{{ iso_base_name }}"
