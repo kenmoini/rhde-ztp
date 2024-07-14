@@ -1,4 +1,4 @@
-import random, string
+import random, string, time
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
 import requests
@@ -42,6 +42,23 @@ else:
         "created": ["July 4th, 2024", "July 10th, 2024", "July 14th, 2024"]
     }
 
+# Send job code to person who will plug things in pop up modal
+@st.experimental_dialog("Send Job Code")
+def sendJobCode():
+    phone = st.text_input("Phone Number")
+    jobCodeSelection = st.selectbox(
+        "Which Job Code to send?",
+        jobCodes["job_code"]
+    )
+    if st.button("Submit"):
+        sendJobCodeResult = requests.post(backendAPI + "/sendJobCode", json={"jobCode": jobCodeSelection, "phone": phone}, verify=False)
+        if sendJobCodeResult.status_code == 200:
+            st.write("Job Code Sent!")
+        else:
+            st.write("Error Sending Job Code")
+        time.sleep(2)
+        st.rerun()
+
 st.set_page_config(page_title="Job Code Manager", layout="wide")
 st.title("Job Code Manager")
 
@@ -60,16 +77,26 @@ with tab1:
                 }
                 """,
         ):
-            refresh_button = st.button(label="Refresh", type="secondary")
+            if st.button("Send Job Code"):
+                sendJobCode()
     df = pd.DataFrame(data=jobCodes)
-    st.dataframe(df, hide_index=True, use_container_width=True, on_select="ignore", selection_mode="single-row", column_config={"job_code": "Job Code", "boot_protocol": "Boot Protocol", "iso_name": "Image", "ipv4_address": "IP", "hostname": "Hostname", "domain": "Domain", "created": "Created"})
+    st.dataframe(df, hide_index=True, use_container_width=True, on_select="ignore", selection_mode="single-row", column_config={"job_code": "Job Code", "boot_protocol": "Boot Protocol", "iso_name": "Image", "ipv4_address": "IP", "hostname": "Hostname", "domain": "Domain", "created": "Created", "actions": "Actions"})
+    with stylable_container(
+        key="align_refresh-right",
+        css_styles="""
+            button {
+                float:right;
+            }
+            """,
+    ):
+        refresh_button = st.button(label="Refresh", type="secondary")
 
 with tab2:
     st.header("Add Job Code")
 
     col1, col2 =st.columns(2)
     with col1:
-        bootProtocol = st.selectbox(label="Boot Protocol", options=["PXE","Redfish"],index=0) 
+        bootProtocol = st.selectbox(label="Boot Protocol", options=["PXE","Redfish","UEFI"],index=0) 
         hostname = st.text_input(label="System Hostname", placeholder="edge-system")
     with col2:
         isoFiles = st.selectbox(label="Boot ISO", options=isoFiles,index=0)

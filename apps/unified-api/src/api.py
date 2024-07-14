@@ -3,6 +3,7 @@ import datetime as dt
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from http.client import HTTPConnection
+from twilio.rest import Client
 
 # job-code-app imported functions
 log = logging.getLogger('urllib3')
@@ -20,6 +21,12 @@ tlsCert = os.environ.get("FLASK_TLS_CERT", "")
 tlsKey = os.environ.get("FLASK_TLS_KEY", "")
 
 ##############################
+# Setup Twilio Variables
+twilioAccountSid = os.environ.get("TWILIO_ACCOUNT_SID", "")
+twilioAuthToken = os.environ.get("TWILIO_AUTH_TOKEN", "")
+twilioFromNumber = os.environ.get("TWILIO_FROM_NUMBER", "")
+
+##############################
 # Setup application variables
 isoPath = os.environ.get("ISO_PATH", "/opt/isos")
 jobCodePath = os.environ.get("JOB_CODE_PATH", "/opt/job-codes")
@@ -32,6 +39,26 @@ aapUpdatePXEJobTemplateID = os.environ.get("AAP_UPDATE_PXE_JOB_TEMPLATE_ID", "12
 
 aapGlueInventoryID = os.environ.get("AAP_GLUE_INVENTORY_ID", "123456")
 #aapUpdatePXEInventoryID = os.environ.get("AAP_INVENTORY_ID", "123456")
+
+scannerAppURL = os.environ.get("SCANNER_APP_URL", "https://scanner-app")
+
+##############################
+# Setup Twilio Client
+if twilioAccountSid != "" and twilioAuthToken != "" and twilioFromNumber != "":
+    twilioClient = Client(twilioAccountSid, twilioAuthToken)
+else:
+    print("Twilio variables not set, cannot creating Twilio client")
+    raise Exception("TwilioParamError")
+
+##############################
+# Send a message with the Twilio API
+def sendTextMessage(toNumber, msgBody):
+    message = twilioClient.messages.create(
+        from_=twilioFromNumber,
+        body=msgBody,
+        to=toNumber
+    )
+    return message
 
 ##############################
 # creates a Flask application
@@ -118,6 +145,26 @@ def createJobCodeRoute():
         #print("Created Job Code: ")
         #print(json.dumps(jobCodeData))
         return json.dumps(jobCodeData)
+
+####################################################################################################
+# Sends a Job Code to an email address and/or phone number
+# Just needs the Twilio API Secrets to be set
+@app.route("/sendJobCode", methods = ['POST'])
+def sendJobCode():
+    if request.method == 'POST':
+        # Get the JSON data from the request
+        jobCodeData = request.get_json()
+
+        toNumber = jobCodeData['phone']
+        jobCode = jobCodeData['jobCode']
+        txtMsgBody = "You have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
+        
+        # Send the text message
+        if toNumber != "":
+            sid = sendTextMessage(toNumber, txtMsgBody)
+
+        # Return the JSON message
+        return json.dumps(sid)
 
 ####################################################################################################
 # Create a new Job Code Claim
