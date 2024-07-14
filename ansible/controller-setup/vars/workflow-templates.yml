@@ -52,5 +52,3 @@ controller_workflows:
           type: job_template
           organization:
             name: "{{ global_organization }}"
-        extra_data:
-          iso_name: "{% raw %}{{ image_name }}{% endraw %}.iso"

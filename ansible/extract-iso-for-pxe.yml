@@ -4,8 +4,9 @@
   become: yes
 
   vars:
+    image_name: minimal-rhel94-image
     iso_src: /opt/isos
-    iso_name: minimal-rhel94-image.iso
+    iso_name: "{{ image_name }}.iso"
     iso_base_name: "{{ iso_name | replace('.iso', '') }}"
 
     architecture: x86_64
