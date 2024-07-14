@@ -1,0 +1,88 @@
+---
+controller_templates:
+  - name: Setup DNS Server
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/setup-dns.yml
+    become_enabled: true
+    credentials:
+      - RHDEMGMT
+
+  - name: Setup FDO Server
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/setup-fdo-server.yml
+    become_enabled: true
+    credentials:
+      - RHDEMGMT
+
+  - name: Setup Image Builder Server
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/setup-image-builder-server.yml
+    become_enabled: true
+    credentials:
+      - RHDEMGMT
+
+  - name: Extract ISO for PXE Server
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/extract-iso-for-pxe.yml
+    become_enabled: true
+    credentials:
+      - RHDEMGMT
+
+  - name: Configure PXE Server for specific MAC Address boots
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/configure-pxe-server.yml
+    become_enabled: true
+    credentials:
+      - RHDEMGMT
+
+  - name: Deploy Microservices to Edge Hub
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/deploy-microservices.yml
+    become_enabled: true
+    credentials:
+      - RHDEMGMT
+
+  - name: Create Blueprint and Image
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/create-blueprint-and-image.yml
+    become_enabled: true
+    credentials:
+      - RHDEMGMT
+    ask_variables_on_launch: true
+    survey_enabled: true
+    survey: "{{ lookup('template', 'templates/create-blueprint-and-image-project_survey.json.j2') | regex_replace('\\n', '') }}"
+
+  - name: Post-bootstrap RHDE Configuration
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/post-bootstrap-config.yml
+    ask_variables_on_launch: true
+    ask_limit_on_launch: true
+    become_enabled: true
+    credentials:
+      - RHDESystems
+      - RHDEVault
+

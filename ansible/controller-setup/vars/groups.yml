@@ -1,0 +1,26 @@
+---
+controller_groups:
+  - name: fdoserver
+    inventory: RHDEInfrastructure
+    hosts:
+      - edge-hub
+
+  - name: edgehub
+    inventory: RHDEInfrastructure
+    hosts:
+      - edge-hub
+
+  - name: ostreemirror
+    inventory: RHDEInfrastructure
+    hosts:
+      - edge-hub
+
+  - name: buildserver
+    inventory: RHDEInfrastructure
+    hosts:
+      - edge-hub
+
+  - name: pxeserver
+    inventory: RHDEInfrastructure
+    hosts:
+      - edge-hub

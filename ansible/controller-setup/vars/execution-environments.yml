@@ -1,0 +1,4 @@
+---
+controller_execution_environments:
+  - name: rhde-ztp-edge
+    image: quay.io/kenmoini/rhde-ztp-ee:latest

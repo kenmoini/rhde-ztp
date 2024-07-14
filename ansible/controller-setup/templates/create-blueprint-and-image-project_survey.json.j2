@@ -1,0 +1,78 @@
+{
+    "name": "Create Blueprint and Image Survey",
+    "description": "Create Blueprint and Image Survey",
+    "spec": [
+      {
+        "question_description": "Use Site Config?",
+        "min": 0,
+        "default": "false",
+        "max": 5,
+        "required": true,
+        "choices": "true\nfalse",
+        "new_question": true,
+        "variable": "use_site_configs",
+        "question_name": "Use Site Configs?",
+        "type": "text"
+      },
+      {
+        "question_description": "Site Config Name",
+        "min": 0,
+        "default": "",
+        "max": 0,
+        "required": false,
+        "choices": "",
+        "new_question": true,
+        "variable": "site_config_name",
+        "question_name": "Site Config Name",
+        "type": "text"
+      },
+      {
+        "question_description": "Create Blueprint?",
+        "min": 0,
+        "default": "true",
+        "max": 5,
+        "required": true,
+        "choices": "true\nfalse",
+        "new_question": true,
+        "variable": "create_blueprints",
+        "question_name": "Create Blueprint?",
+        "type": "text"
+      },
+      {
+        "question_description": "Create Image?",
+        "min": 0,
+        "default": "true",
+        "max": 5,
+        "required": true,
+        "choices": "true\nfalse",
+        "new_question": true,
+        "variable": "create_image",
+        "question_name": "Create Image?",
+        "type": "text"
+      },
+      {
+        "question_description": "What type of image to make?",
+        "min": 0,
+        "max": 0,
+        "default": "",
+        "required": true,
+        "choices": "edge-container\nedge-commit\nedge-simplified-installer",
+        "new_question": true,
+        "variable": "compose_type",
+        "question_name": "Image Type?",
+        "type": "multiplechoice"
+      },
+      {
+        "question_description": "Extract Image if this is an edge-container or edge-commit image type?",
+        "min": 0,
+        "default": "true",
+        "max": 5,
+        "required": true,
+        "choices": "true\nfalse",
+        "new_question": true,
+        "variable": "extract_image",
+        "question_name": "Extract Image?",
+        "type": "text"
+      },
+    ]
+}

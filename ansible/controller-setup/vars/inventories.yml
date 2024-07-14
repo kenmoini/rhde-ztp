@@ -1,0 +1,29 @@
+---
+controller_inventories:
+  - name: RHDESystems
+    organization: "{{ global_organization }}"
+    description: Managed systems for RHDE
+
+  - name: RHDEInfrastructure
+    organization: "{{ global_organization }}"
+    description: Management and Service Infrastructure for RHDE
+
+  # - name: RHDEBuildServer
+  #   organization: "{{ global_organization }}"
+  #   description: Image Build Server for RHDE
+
+  # - name: RHDEPXEServer
+  #   organization: "{{ global_organization }}"
+  #   description: PXE Server for RHDE
+
+  # - name: RHDEOSTreeMirror
+  #   organization: "{{ global_organization }}"
+  #   description: OSTree Mirror Server for RHDE
+
+  # - name: RHDEFDOServer
+  #   organization: "{{ global_organization }}"
+  #   description: FDO Server for RHDE
+
+  # - name: RHDEEdgeHub
+  #   organization: "{{ global_organization }}"
+  #   description: Edge Hub for RHDE
