@@ -1,0 +1,42 @@
+---
+controller_workflows:
+  - name: Image Builder & Distribution
+    description: Create a Blueprint, Edge Commit image, and a Simplified Installer ISO in one shot
+    organization:
+      name: "{{ global_organization }}"
+    inventory: RHDEInfrastructure
+    ask_variables_on_launch: true
+    extra_vars:
+      use_site_configs: "true"
+    survey: "{{ lookup('template', 'templates/image-builder-distribution-workflow_survey.json.j2') | regex_replace('\\n', '') }}"
+    survey_enabled: true
+    workflow_nodes:
+      - all_parents_must_converge: false
+        identifier: createcommit
+        unified_job_template:
+          name: Create Blueprint and Image
+          type: job_template
+          organization:
+            name: "{{ global_organization }}"
+        related:
+          success_nodes:
+            - workflow_job_template:
+                name: Create Blueprint and Image
+              identifier: createsimplified
+        extra_data:
+          create_blueprints: "true"
+          create_image: "true"
+          compose_type: edge-commit
+          extract_image: "true"
+      - all_parents_must_converge: false
+        identifier: createsimplified
+        unified_job_template:
+          name: Create Blueprint and Image
+          type: job_template
+          organization:
+            name: "{{ global_organization }}"
+        extra_data:
+          create_blueprints: "true"
+          create_image: "true"
+          compose_type: edge-simplified-installer
+          extract_image: "true"

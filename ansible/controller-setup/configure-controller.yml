@@ -45,3 +45,4 @@
 
     - {role: infra.controller_configuration.projects, when: controller_projects is defined}
     - {role: infra.controller_configuration.job_templates, when: controller_templates is defined}
+    - {role: infra.controller_configuration.workflow_job_templates, when: controller_workflows is defined}

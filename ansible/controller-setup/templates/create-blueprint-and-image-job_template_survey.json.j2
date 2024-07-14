@@ -12,19 +12,31 @@
         "new_question": true,
         "variable": "use_site_configs",
         "question_name": "Use Site Configs?",
-        "type": "text"
+        "type": "multiplechoice"
       },
       {
         "question_description": "Site Config Name",
         "min": 0,
         "default": "",
-        "max": 0,
+        "max": 255,
         "required": false,
         "choices": "",
         "new_question": true,
         "variable": "site_config_name",
         "question_name": "Site Config Name",
         "type": "text"
+      },
+      {
+        "question_description": "What type of image to make?",
+        "min": 0,
+        "max": 36,
+        "default": "",
+        "required": true,
+        "choices": "edge-container\nedge-commit\nedge-simplified-installer",
+        "new_question": true,
+        "variable": "compose_type",
+        "question_name": "Image Type?",
+        "type": "multiplechoice"
       },
       {
         "question_description": "Create Blueprint?",
@@ -36,7 +48,7 @@
         "new_question": true,
         "variable": "create_blueprints",
         "question_name": "Create Blueprint?",
-        "type": "text"
+        "type": "multiplechoice"
       },
       {
         "question_description": "Create Image?",
@@ -48,18 +60,6 @@
         "new_question": true,
         "variable": "create_image",
         "question_name": "Create Image?",
-        "type": "text"
-      },
-      {
-        "question_description": "What type of image to make?",
-        "min": 0,
-        "max": 0,
-        "default": "",
-        "required": true,
-        "choices": "edge-container\nedge-commit\nedge-simplified-installer",
-        "new_question": true,
-        "variable": "compose_type",
-        "question_name": "Image Type?",
         "type": "multiplechoice"
       },
       {
@@ -72,7 +72,7 @@
         "new_question": true,
         "variable": "extract_image",
         "question_name": "Extract Image?",
-        "type": "text"
+        "type": "multiplechoice"
       },
     ]
 }

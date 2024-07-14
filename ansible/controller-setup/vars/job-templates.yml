@@ -78,7 +78,7 @@ controller_templates:
       - RHDEMGMT
     ask_variables_on_launch: true
     survey_enabled: true
-    survey: "{{ lookup('template', 'templates/create-blueprint-and-image-project_survey.json.j2') | regex_replace('\\n', '') }}"
+    survey: "{{ lookup('template', 'templates/create-blueprint-and-image-job_template_survey.json.j2') | regex_replace('\\n', '') }}"
 
   - name: Post-bootstrap RHDE Configuration
     organization: "{{ global_organization }}"

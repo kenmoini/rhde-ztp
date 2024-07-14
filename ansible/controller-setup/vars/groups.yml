@@ -24,3 +24,8 @@ controller_groups:
     inventory: RHDEInfrastructure
     hosts:
       - edge-hub
+
+  - name: dhcpd
+    inventory: RHDEInfrastructure
+    hosts:
+      - edge-hub
