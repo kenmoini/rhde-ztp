@@ -59,8 +59,8 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v6
       with:
-        context: ./apps/ocr-app/
-        file: ./apps/ocr-app/Containerfile.frontend
+        context: ./apps/old/ocr-app/
+        file: ./apps/old/ocr-app/Containerfile.frontend
         labels: ${{ steps.meta.outputs.labels }}
         tags: ${{ steps.meta.outputs.tags }}
         push: true

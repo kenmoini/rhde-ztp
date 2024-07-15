@@ -59,8 +59,8 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v6
       with:
-        context: ./apps/glue-service/
-        file: ./apps/glue-service/Containerfile
+        context: ./apps/old/glue-service/
+        file: ./apps/old/glue-service/Containerfile
         labels: ${{ steps.meta.outputs.labels }}
         tags: ${{ steps.meta.outputs.tags }}
         push: true
