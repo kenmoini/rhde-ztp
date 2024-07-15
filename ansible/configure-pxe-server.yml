@@ -53,7 +53,7 @@
         - regexp: 'timeout=60'
           replace: 'timeout=5'
         - regexp: 'image_file=/run/media/iso/image.raw.xz'
-          replace: 'image_url=http://{{ httpd_server_ip }}/pxe/install/{{ architecture }}/{{ distro_key }}/ext/{{ iso_base_name }}/image.raw.xz'
+          replace: 'image_url=http://{{ httpd_server_ip }}/pxe/install/{{ architecture }}/{{ distro_key }}/mount/{{ iso_base_name }}/image.raw.xz'
 
     #- name: Template EFI Boot Configuration
     #  template:
