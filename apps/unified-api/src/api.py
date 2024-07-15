@@ -57,9 +57,9 @@ scannerAppURL = os.environ.get("SCANNER_APP_URL", "https://scanner-app")
 # Setup Twilio Client
 if twilioAccountSid != "" and twilioAuthToken != "" and twilioFromNumber != "":
     twilioClient = Client(twilioAccountSid, twilioAuthToken)
-else:
-    print("Twilio variables not set, cannot creating Twilio client")
-    raise Exception("TwilioParamError")
+#else:
+    #print("Twilio variables not set, cannot creating Twilio client")
+    #raise Exception("TwilioParamError")
 
 ##############################
 # Send a message with the Twilio API
