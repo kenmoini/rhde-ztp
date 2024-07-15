@@ -218,16 +218,16 @@
         dest: "{{ ansible_env.HOME }}/.kube/config"
         owner: "{{ ansible_env.USER }}"
         group: "{{ ansible_env.USER }}"
-        mode: 0600
+        mode: 0644
 
     - name: Copy over the remote kubeconfig file
       ansible.builtin.copy:
         remote_src: true
         src: /var/lib/microshift/resources/kubeadmin/api.{{ microshift_hostname }}.{{ microshift_base_domain }}/kubeconfig
-        dest: "{{ ansible_env.HOME }}/.kube/config"
+        dest: "{{ ansible_env.HOME }}/.kube/remote-config"
         owner: "{{ ansible_env.USER }}"
         group: "{{ ansible_env.USER }}"
-        mode: 0644
+        mode: 0600
 
     - name: Create az command file
       ansible.builtin.copy:
