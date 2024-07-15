@@ -322,13 +322,13 @@
         path: "{{ item }}"
         state: directory
       loop:
-        - "/opt/job-codes"
-        - "/opt/job-codes/claims"
+        #- "/opt/job-codes"
+        #- "/opt/job-codes/claims"
+        #- "/opt/dropbox"
+        #- "/opt/registry"
         - "/opt/isos"
-        - "/opt/dropbox"
         - "/opt/pxe"
         - "/opt/ostree"
-        - "/opt/registry"
         - "{{ service_containers_dir }}/shared/volumes/certs"
         - "{{ service_containers_dir }}/shared/volumes/secrets"
         - "{{ service_containers_dir }}/haproxy-ingress/volumes/config"
@@ -340,7 +340,7 @@
     - name: Set permissionss on shared directories
       ansible.builtin.file:
         path: "{{ item }}"
-        mode: 0755
+        mode: 0777
         state: directory
       loop:
         - "/opt/dropbox"
