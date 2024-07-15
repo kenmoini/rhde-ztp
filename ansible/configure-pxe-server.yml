@@ -30,7 +30,7 @@
   tasks:
     - name: Template EFI Boot Configuration
       template:
-        src: templates/per-mac-uefi-grub.cfg.j2
+        src: templates/per-mac-efi-grub.cfg.j2
         dest: "{{ efi_pxe_config_path }}/grub.cfg-01-{{ mac_address_dashes_lower }}"
         mode: 0644
 
