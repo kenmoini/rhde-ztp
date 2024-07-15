@@ -275,7 +275,10 @@ def createJobCodeClaimRoute():
                                                            "ipv4_dns_search": jobCodeInfo["ipv4_dns_search"],
                                                            "hostname": jobCodeInfo["hostname"],
                                                            "domain": jobCodeInfo["domain"],
-                                                           "job_code": jobCodeInfo["job_code"]})}, verify=False)
+                                                           "job_code": jobCodeInfo["job_code"],
+                                                           "iso_name": jobCodeInfo["iso_name"],
+                                                           "root_password": jobCodeInfo["root_password"],
+                                                           "ssh_pub_key": jobCodeInfo["ssh_pub_key"]})}, verify=False)
 
         if runJobTemplate.status_code != 201:
             return json.dumps({"status": "failed", "error": "Error launching job in AAP2 Controller"})
