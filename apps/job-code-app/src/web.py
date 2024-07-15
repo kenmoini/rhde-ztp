@@ -166,11 +166,15 @@ if submit_button:
             }
         }
         response = requests.post(backendAPI + "/createJobCode", json=job_code_data, verify=False)
-        container_output = st.empty()
+        #container_output = st.empty()
         # print out the job code
         # Make sure the response was successful
         if response.status_code == 200:
-            container_output.write("Job Code " + job_code + " Created Successfully!")
+            # container_output.write("Job Code " + job_code + " Created Successfully!")
             jobCodes = requests.get(backendAPI + "/listJobCodes", verify=False).json()
+            st.toast("Job Code " + job_code + " Created Successfully!", icon='🎉')
+            time.sleep(3)
+            st.rerun()
         else:
-            container_output.write("Error Creating Job Code")
+            st.toast("Error Creating Job Code", icon='💩')
+            #container_output.write("Error Creating Job Code")
