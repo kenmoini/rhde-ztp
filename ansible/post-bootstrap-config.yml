@@ -224,7 +224,7 @@
       ansible.builtin.copy:
         remote_src: true
         src: /var/lib/microshift/resources/kubeadmin/api.{{ microshift_hostname }}.{{ microshift_base_domain }}/kubeconfig
-        dest: "{{ ansible_env.HOME }}/.kube/remote-config"
+        dest: "{{ ansible_env.HOME }}/.kube/config"
         owner: "{{ ansible_env.USER }}"
         group: "{{ ansible_env.USER }}"
         mode: 0644
@@ -238,7 +238,7 @@
           /usr/bin/az extension add --name k8s-configuration
           /usr/bin/az connectedk8s connect --name "{{ microshift_hostname }}" \
             --resource-group "{{ azureResourceGroup }}" \
-            --kube-config /kubeconfig/remote-config
+            --kube-config /kubeconfig/config
         dest: "{{ ansible_env.HOME }}/.kube/az-connect.sh"
         owner: "{{ ansible_env.USER }}"
         group: "{{ ansible_env.USER }}"
@@ -265,7 +265,7 @@
 
     - name: Reset the permissions on the kubeconfig file
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.kube/remote-config"
+        path: "{{ ansible_env.HOME }}/.kube/config"
         owner: "{{ ansible_env.USER }}"
         group: "{{ ansible_env.USER }}"
         mode: 0600
