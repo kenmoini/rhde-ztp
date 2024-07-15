@@ -19,7 +19,7 @@
         subjectAltNames:
           - api.{{ microshift_hostname }}.{{ microshift_base_domain }}
 
-    lvm_device: /dev/sdb
+    #lvm_device: /dev/sda
     lvm_vg_name: mshift
 
     connect_to_azure_arc: true
@@ -38,6 +38,58 @@
       ansible.builtin.wait_for_connection:
         delay: 10
         timeout: 300
+
+    - name: Detect non-bootdisk
+      block:
+        - name: Collect only facts about hardware
+          ansible.builtin.setup:
+            gather_subset:
+            - hardware
+
+        - name: Set facts for detected disks
+          ansible.builtin.set_fact:
+            disks: "{{ hostvars[inventory_hostname].ansible_devices.keys() | list }}"
+
+        - name: Remove any disk from disks that start with dm
+          ansible.builtin.set_fact:
+            disks: "{{ disks | difference([item]) }}"
+          loop: "{{ disks }}"
+          when: item.startswith('dm')
+
+        - name: Debug
+          ansible.builtin.debug:
+            var: disks
+
+        - name: Find matching boot disk
+          ansible.builtin.shell: |
+            fdisk -l | grep "EFI"
+          register: boot_disk
+
+        - name: Debug
+          ansible.builtin.debug:
+            var: boot_disk.stdout
+
+        - name: Loop through the disks, set a fact if it is in the boot_disk
+          ansible.builtin.set_fact:
+            detected_boot_disk: "{{ item }}"
+          loop: "{{ disks }}"
+          when: item in boot_disk.stdout
+
+        - name: Debug
+          ansible.builtin.debug:
+            var: detected_boot_disk
+
+        - name: Remove the boot disk from the disks
+          ansible.builtin.set_fact:
+            disks: "{{ disks | difference([detected_boot_disk]) }}"
+
+        - name: Debug
+          ansible.builtin.debug:
+            var: disks
+
+        - name: Set the lvm_device
+          ansible.builtin.set_fact:
+            lvm_device: "/dev/{{ disks | first }}"
 
     - name: Enable SELinux
       ansible.posix.selinux:
