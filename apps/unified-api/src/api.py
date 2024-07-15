@@ -263,6 +263,9 @@ def createJobCodeClaimRoute():
         jobCodeInfo["ipv4_dns_search"] = jobCodeData["config"]["ipv4_dns_search"]
         jobCodeInfo["hostname"] = jobCodeData["config"]["hostname"]
         jobCodeInfo["domain"] = jobCodeData["config"]["domain"]
+        jobCodeInfo["iso_name"] = jobCodeData["config"]["iso_name"]
+        jobCodeInfo["root_password"] = jobCodeData["config"]["root_password"]
+        jobCodeInfo["ssh_pub_key"] = jobCodeData["config"]["ssh_pub_key"]
 
         # Kick off the Ansible Job Template that reconfigures the PXE server
         runJobTemplate = requests.post(aapControllerURL.replace('"','') + "/api/v2/job_templates/" + aapUpdatePXEJobTemplateID.replace('"','') + "/launch/",
