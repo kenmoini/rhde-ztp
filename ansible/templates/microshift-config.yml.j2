@@ -1,47 +1,35 @@
-debugging:
-  # Log verbosity ('Normal', 'Debug', 'Trace', 'TraceAll'):
-  logLevel: "{{ microshift_log_level | default('Normal') }}"
-
-dns:
-  # Base domain of the cluster. All managed DNS records will be sub-domains of this base.
-  baseDomain: {{ microshift_base_domain }}
-
 apiServer:
-  # The Subject Alternative Names for the external certificates in API server (defaults to hostname -A)
-  subjectAltNames:
+    # Kube apiserver advertise address to work around the certificates issue when requiring external access using the node IP. This will turn into the IP configured in the endpoint slice for kubernetes service. Must be a reachable IP from pods. Defaults to service network CIDR first address.
+    advertiseAddress: ""
+    # SubjectAltNames added to API server certs
+    subjectAltNames:
 {% for san in microshift_config.apiServer.subjectAltNames %}
-    - {{ san }}
+        - "{{ san }}"
 {% endfor %}
-
-node:
-  # If non-empty, use this string to identify the node instead of the hostname
-  hostnameOverride: ""
-  # IP address of the node, passed to the kubelet.
-  # If not specified, kubelet will use the node's default IP address.
-  nodeIP: "{{ microshift_node_ip | default('') }}"
-
+debugging:
+    logLevel: {{ microshift_log_level | default('Normal') }}
+dns:
+    baseDomain: {{ microshift_base_domain }}
+etcd:
+    memoryLimitMB: 0
+manifests:
+    kustomizePaths:
+        - /usr/lib/microshift/manifests
+        - /usr/lib/microshift/manifests.d/*
+        - /etc/microshift/manifests
+        - /etc/microshift/manifests.d/*
 network:
-  clusterNetwork:
-  # IP range for use by the cluster
+    clusterNetwork:
 {% for cidr in microshift_config.network.clusterNetworkCIDRs %}
-    - cidr: {{ cidr }}
+        - {{ cidr }}
 {% endfor %}
-  serviceNetwork:
-  # IP range for services in the cluster
+    # IP address pool for services. Currently, we only support a single entry here. This field is immutable after installation.
+    serviceNetwork:
 {% for svcNet in microshift_config.network.serviceNetwork %}
     - {{ svcNet }}
 {% endfor %}
-  # Node ports allowed for services
-  serviceNodePortRange: {{ microshift_config.network.serviceNodePortRange }}
-
-etcd:
-  # Memory limit for etcd, in Megabytes: 0 is no limit.
-  memoryLimitMB: 0
-
-manifests:
-  # The locations on the filesystem to scan for kustomization files to use to load manifests. Set to a list of paths to scan only those paths. Set to an empty list to disable loading manifests. The entries in the list can be glob patterns to match multiple subdirectories.
-  kustomizePaths:
-    - /usr/lib/microshift/manifests
-    - /usr/lib/microshift/manifests.d/*
-    - /etc/microshift/manifests
-    - /etc/microshift/manifests.d/*
+    # The port range allowed for Services of type NodePort. If not specified, the default of 30000-32767 will be used. Such Services without a NodePort specified will have one automatically allocated from this range. This parameter can be updated after the cluster is installed.
+    serviceNodePortRange: {{ microshift_config.network.serviceNodePortRange }}
+node:
+    hostnameOverride: ""
+    nodeIP: "{{ microshift_node_ip | default('') }}"
