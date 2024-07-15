@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - apps/glue-service/**
+      - apps/old/glue-service/**
       - .github/workflows/build-fdo-ansible-glue.yml
 
   # Schedule workflow run at 00:00 on Sunday

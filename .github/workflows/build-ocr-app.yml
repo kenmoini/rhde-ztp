@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - apps/ocr-app/**
+      - apps/old/ocr-app/**
       - .github/workflows/build-ocr-app.yml
 
   # Schedule workflow run at 00:00 on Sunday
