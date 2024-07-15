@@ -45,11 +45,11 @@ jobCodePath = os.environ.get("JOB_CODE_PATH", "/opt/job-codes")
 aapControllerURL = os.environ.get("AAP_CONTROLLER_URL", "https://aap2-controller")
 aapControllerToken = os.environ.get("AAP_CONTROLLER_TOKEN", "")
 
-aapGlueJobTemplateID = os.environ.get("AAP_GLUE_JOB_TEMPLATE_ID", "123456")
+aapPostBootstrapJobTemplateID = os.environ.get("AAP_POST_BOOTSTRAP_JOB_TEMPLATE_ID", "123456")
 aapUpdatePXEJobTemplateID = os.environ.get("AAP_UPDATE_PXE_JOB_TEMPLATE_ID", "123456")
 
-aapGlueInventoryID = os.environ.get("AAP_GLUE_INVENTORY_ID", "123456")
-#aapUpdatePXEInventoryID = os.environ.get("AAP_INVENTORY_ID", "123456")
+aapPostBootstrapInventoryID = os.environ.get("AAP_POST_BOOTSTRAP_INVENTORY_ID", "123456")
+aapUpdatePXEInventoryID = os.environ.get("AAP_RHDE_INFRA_INVENTORY_ID", "123456")
 
 scannerAppURL = os.environ.get("SCANNER_APP_URL", "https://scanner-app")
 
@@ -319,14 +319,14 @@ def listClaimedJobCodesRoute():
 
         # Call AAP2 Controller, check inventory for existing host
         # If host does not exist, create a new host
-        hostSearch = requests.get(aapControllerURL + "/api/v2/inventories/" + aapGlueInventoryID + "/hosts?name=" + jobCodeInfo["hostname"], headers={"Authorization": "Bearer " + aapControllerToken}, verify=False)
+        hostSearch = requests.get(aapControllerURL + "/api/v2/inventories/" + aapPostBootstrapInventoryID + "/hosts?name=" + jobCodeInfo["hostname"], headers={"Authorization": "Bearer " + aapControllerToken}, verify=False)
         hostSearchData = hostSearch.json()
         if hostSearchData["count"] == 0:
             # Create the host
-            hostCreate = requests.post(aapControllerURL + "/api/v2/inventories/" + aapGlueInventoryID + "/hosts/",
+            hostCreate = requests.post(aapControllerURL + "/api/v2/inventories/" + aapPostBootstrapInventoryID + "/hosts/",
                                        headers={"Authorization": "Bearer " + aapControllerToken},
                                        json={"name": jobCodeInfo["hostname"],
-                                             "inventory": aapGlueInventoryID,
+                                             "inventory": aapPostBootstrapInventoryID,
                                              "enabled": True,
                                              "variables": json.dumps({"ansible_host": provisionedIPAddress,
                                                            "ansible_user": "root"})}, verify=False)
@@ -335,7 +335,7 @@ def listClaimedJobCodesRoute():
                 return json.dumps({"error": "Error creating host in AAP2 Controller"})
         
         # Run the job limited to the newly created host
-        runJobTemplate = requests.post(aapControllerURL + "/api/v2/job_templates/" + aapGlueJobTemplateID + "/launch/",
+        runJobTemplate = requests.post(aapControllerURL + "/api/v2/job_templates/" + aapPostBootstrapJobTemplateID + "/launch/",
                                         headers={"Authorization": "Bearer " + aapControllerToken},
                                         json={"limit": jobCodeInfo["hostname"],
                                               "extra_vars": json.dumps({"provisioned_ip_address": provisionedIPAddress,
