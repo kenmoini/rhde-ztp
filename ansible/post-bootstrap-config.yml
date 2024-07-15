@@ -240,8 +240,8 @@
     - name: Connect to Azure Arc
       ansible.builtin.shell:
         cmd: |
-          az login --service-principal -u "{{ azureServicePrincipalID }}" -p "{{ azureServicePrincipalClientSecret }}" --tenant "{{ azureTenantID }}"
-          az connectedk8s connect --name "{{ microshift_hostname }}" \
+          /usr/bin/az login --service-principal -u "{{ azureServicePrincipalID }}" -p "{{ azureServicePrincipalClientSecret }}" --tenant "{{ azureTenantID }}"
+          /usr/bin/az connectedk8s connect --name "{{ microshift_hostname }}" \
             --resource-group "{{ azureResourceGroup }}" \
             --kube-config /var/lib/microshift/resources/kubeadmin/api.{{ microshift_hostname }}.{{ microshift_base_domain }}/kubeconfig
 
