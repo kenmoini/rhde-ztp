@@ -24,8 +24,8 @@
     iso_path: "{{ pxe_server_path }}/install/{{ architecture }}/{{ distro_key }}/iso"
     extract_iso_path: "{{ pxe_server_path }}/install/{{ architecture }}/{{ distro_key }}/ext"
 
-    efi_pxe_config_path: "{{ pxe_server_path }}/{{ tftp_sub_path }}/{{ boot_architecture }}/{{ architecture }}"
-    bios_pxe_config_path: "{{ pxe_server_path }}/{{ tftp_sub_path }}/{{ boot_architecture }}/{{ architecture }}/pxelinux.cfg"
+    efi_pxe_config_path: "{{ pxe_server_path }}/{{ tftp_sub_path }}/EFI/{{ architecture }}"
+    bios_pxe_config_path: "{{ pxe_server_path }}/{{ tftp_sub_path }}/BIOS/{{ architecture }}/pxelinux.cfg"
 
   tasks:
     - name: Template EFI Boot Configuration
@@ -34,7 +34,7 @@
         dest: "{{ efi_pxe_config_path }}/grub.cfg-01-{{ mac_address_dashes_lower }}"
         mode: 0644
 
-    - name: Template BIOS Boot Configuration
+    - name: Template BIOS Boot Configuration because why not
       template:
         src: templates/per-mac-bios-pxelinux.cfg.j2
         dest: "{{ bios_pxe_config_path }}/01-{{ mac_address_dashes_lower }}"
