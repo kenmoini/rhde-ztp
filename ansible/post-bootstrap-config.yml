@@ -239,7 +239,7 @@
 
     - name: Wait for the microshift API to come online
       ansible.builtin.shell: |
-        while ! curl -k https://api.{{ microshift_hostname }}.{{ microshift_base_domain }}:6443/healthz; do
+        while ! curl -k https://localhost:6443/healthz; do
           sleep 5
         done
 
