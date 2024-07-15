@@ -237,6 +237,12 @@
     #    name: ext-cluster-importer-sa-token
     #  register: serviceaccount_secret
 
+    - name: Wait for the microshift API to come online
+      ansible.builtin.shell: |
+        while ! curl -k https://api.{{ microshift_hostname }}.{{ microshift_base_domain }}:6443/healthz; do
+          sleep 5
+        done
+
     - name: Connect to Azure Arc
       ansible.builtin.shell:
         cmd: |
