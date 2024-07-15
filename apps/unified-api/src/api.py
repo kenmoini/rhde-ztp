@@ -204,13 +204,13 @@ def sendJobCode():
 
                 # Send the text message with Textbelt
                 if textbeltAPIKey != "":
-                    tbsend = sendTextMessage(toNumberCountryCode, txtMsgBody)
+                    tbsend = sendTextBeltMessage(toNumberCountryCode, txtMsgBody)
                     # Return the JSON message
                     return tbsend
 
                 # Send the text message with Twilio
                 if twilioAccountSid != "" and twilioAuthToken != "":
-                    sid = sendTextBeltMessage(toNumberCountryCode, txtMsgBody)
+                    sid = sendTextMessage(toNumberCountryCode, txtMsgBody)
                     # Return the JSON message
                     return json.dumps({"status": "success", "sid": sid.sid})
 
