@@ -48,12 +48,23 @@
         value: 192.168.99.14/24
       - name: scanner-app
         value: 192.168.99.15/24
-      - name: "*.apps"
+      - name: '*.apps'
         value: 192.168.99.16
       - name: job-code-web
         value: 192.168.99.17/24
       - name: registry
         value: 192.168.99.18/24
+
+      - name: buzz-lightyear
+        value: 192.168.99.40/24
+      - name: cabbage
+        value: 192.168.99.41/24
+      - name: suki
+        value: 192.168.99.42/24
+
+      - name: suki-mgmt
+        value: 192.168.99.46/24
+
 
     # ========================================================================
     # No need to edit these really
@@ -86,7 +97,7 @@
     - name: Template the GoZones configuration file
       ansible.builtin.template:
         src: templates/setup-dns-server/go-zones.conf.j2
-        dest: "{{ service_base_dir }}/{{ service_name }}/volumes/etc-config/server.conf"
+        dest: "{{ service_base_dir }}/{{ service_name }}/volumes/etc-config/server.yml"
         mode: 0644
       register: template_go_zones_config
 

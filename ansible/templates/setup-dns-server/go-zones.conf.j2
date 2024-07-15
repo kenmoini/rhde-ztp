@@ -68,7 +68,7 @@ dns:
           - name: {{ dns_server_name }}
             value: {{ dns_server_ip }}/24
 {% for record in ARecords %}
-          - name: {{ record.name }}
+          - name: "{{ record.name }}"
             value: {{ record.value }}
 {% endfor %}
 

@@ -1,4 +1,3 @@
-cat > /opt/service-containers/go-zones/scripts/servicectl.sh << EOF
 #!/bin/bash
 
 set -x
@@ -64,9 +63,9 @@ case $1 in
     # Deploy ${CONTAINER_NAME} container
     echo -e "Deploying ${CONTAINER_NAME}...\n"
 
-    /usr/bin/podman run -d --name "${CONTAINER_NAME}" --privileged \\
-      --network "${NETWORK_NAME}" --ip "${IP_ADDRESS}" -p "${CONTAINER_PORT}" \\
-      -v ${VOLUME_MOUNT_ONE} -v ${VOLUME_MOUNT_TWO} \\
+    /usr/bin/podman run -d --name "${CONTAINER_NAME}" --privileged \
+      --network "${NETWORK_NAME}" --ip "${IP_ADDRESS}" -p "${CONTAINER_PORT}" \
+      -v ${VOLUME_MOUNT_ONE} -v ${VOLUME_MOUNT_TWO} \
       ${RESOURCE_LIMITS} ${CONTAINER_SOURCE}
 
     ;;
