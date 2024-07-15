@@ -91,7 +91,12 @@
           ansible.builtin.debug:
             var: disks
 
+        - name: Set a fact if a device was not detected
+          ansible.builtin.set_fact:
+            no_additional_devices: "{{ 'true' if disks | length == 0 else 'false' }}"
+
         - name: Set the lvm_device
+          when: no_additional_devices == 'false'
           ansible.builtin.set_fact:
             lvm_device: "/dev/{{ disks | first }}"
 
@@ -101,6 +106,7 @@
         state: enforcing
 
     - name: Configure new LVM Volume Group with the second disk
+      when: no_additional_devices == 'false'
       ansible.builtin.lvg:
         vg: "{{ lvm_vg_name }}"
         pvs: "{{ lvm_device }}"
@@ -123,6 +129,7 @@
         mode: 0644
 
     - name: Template the LMVO configuration
+      when: no_additional_devices == 'false'
       ansible.builtin.template:
         src: templates/lvmd.yaml.j2
         dest: /etc/microshift/lvmd.yaml
