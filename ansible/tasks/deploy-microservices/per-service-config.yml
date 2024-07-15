@@ -1,0 +1,37 @@
+---
+
+
+- name: "Pull the container images - {{ service.name }}"
+  containers.podman.podman_image:
+    name: "{{ service.image }}"
+    pull: yes
+    force: yes
+  register: container_image_pull
+
+- name: "Create the service scripts directories - {{ service.name }}"
+  ansible.builtin.file:
+    path: "{{ service_containers_dir }}/{{ service.name }}/scripts"
+    state: directory
+
+- name: "Create the container init scripts - {{ service.name }}"
+  ansible.builtin.template:
+    src: "templates/servicectl.sh.j2"
+    dest: "{{ service_containers_dir }}/{{ service.name }}/scripts/servicectl.sh"
+    mode: 0755
+  register: template_servicectl
+
+- name: "Template the container unit files - {{ service.name }}"
+  ansible.builtin.template:
+    src: "templates/caas.service.j2"
+    dest: "/etc/systemd/system/{{ service.name }}.service"
+  register: template_unit_file
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: "Start or restart the container services - {{ service.name }}"
+  ansible.builtin.systemd:
+    name: "{{ service.name }}"
+    state: "{{ 'restarted' if template_unit_file.changed or container_image_pull.changed or template_servicectl.changed else 'started'}}"
+    enabled: yes

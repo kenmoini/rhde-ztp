@@ -27,9 +27,9 @@
     aap2_controller_url: "https://aap2-controller.{{ base_domain }}"
     aap2_controller_token: LmcwokPirudGDMBJWYgxNj5RkVW2iE
     aap2_rhde_inventory_id: 3
-    aap2_rhde_infrastructure_inventory_id: 4
-    aap2_glue_job_template_id: 9
-    aap2_update_pxe_job_template_id: 7
+    aap2_rhde_infra_inventory_id: 4
+    aap2_post_bootstrap_job_template_id: 18
+    aap2_update_pxe_job_template_id: 15
 
     # ========================================================================
     # Optional vars to change in your environment
@@ -106,14 +106,17 @@
           value: "{{ aap2_controller_url }}"
         - name: AAP_CONTROLLER_TOKEN
           value: "{{ aap2_controller_token }}"
-        - name: AAP_INVENTORY_ID
+
+        - name: AAP_RHDE_INFRA_INVENTORY_ID
+          value: "{{ aap2_rhde_infra_inventory_id }}"
+        - name: AAP_POST_BOOTSTRAP_INVENTORY_ID
           value: "{{ aap2_rhde_inventory_id }}"
-        - name: AAP_GLUE_INVENTORY_ID
-          value: "{{ aap2_rhde_inventory_id }}"
-        - name: AAP_GLUE_JOB_TEMPLATE_ID
-          value: "{{ aap2_glue_job_template_id }}"
+
+        - name: AAP_POST_BOOTSTRAP_JOB_TEMPLATE_ID
+          value: "{{ aap2_post_bootstrap_job_template_id }}"
         - name: AAP_UPDATE_PXE_JOB_TEMPLATE_ID
           value: "{{ aap2_update_pxe_job_template_id }}"
+
         - name: SCANNER_APP_URL
           value: "http://scanner-app.apps.{{ base_domain }}"
 
@@ -274,48 +277,15 @@
         - podman.socket
         - podman.service
 
-    - name: Pull the container images
+    - name: Pull the non-service container images
       containers.podman.podman_image:
         name: "{{ container_image }}"
         pull: yes
         force: yes
       loop:
-        - "{{ jobCodeWebContainer }}"
-        - "{{ scannerAppContainer }}"
-        - "{{ unifiedAPIContainer }}"
-        - "{{ haproxyContainer }}"
-        - "{{ nginxContainer }}"
-        - "{{ registryContainer }}"
         - quay.io/kenmoini/rhde-ztp-ee:latest
-        #- "{{ jobCodeAPIContainer }}"
-        #- "{{ glueServiceContainer }}"
-        #- "{{ ntpContainer }}"
       loop_control:
         loop_var: container_image
-
-    - name: Template the container unit files
-      ansible.builtin.template:
-        src: "templates/caas.service.j2"
-        dest: "/etc/systemd/system/{{ service.name }}.service"
-      loop: "{{ services }}"
-      loop_control:
-        loop_var: service
-
-    - name: Create the service directories
-      ansible.builtin.file:
-        path: "{{ service_containers_dir }}/{{ service.name }}"
-        state: directory
-      loop: "{{ services }}"
-      loop_control:
-        loop_var: service
-
-    - name: Create the service scripts directories
-      ansible.builtin.file:
-        path: "{{ service_containers_dir }}/{{ service.name }}/scripts"
-        state: directory
-      loop: "{{ services }}"
-      loop_control:
-        loop_var: service
 
     - name: Make needed shared directories
       ansible.builtin.file:
@@ -368,19 +338,8 @@
         src: "{{ root_ca_cert_file_path }}"
         dest: "/opt/dropbox/root-ca.crt"
 
-    - name: Template chronyd config
-      ansible.builtin.template:
-        src: "templates/chrony.conf.j2"
-        dest: "/etc/chrony.conf"
-        backup: yes
-      register: chrony_conf
-
-    - name: Restart the chronyd service
-      when: chrony_conf.changed
-      ansible.builtin.systemd:
-        name: chronyd
-        state: restarted
-        enabled: yes
+    - name: Run chrony configuration tasks
+      include_tasks: tasks/deploy-microservices/configure-on-host-chrony.yml
 
     - name: Template the scanner app config
       ansible.builtin.template:
@@ -407,24 +366,8 @@
         src: "templates/nginx.default.conf.j2"
         dest: "{{ service_containers_dir }}/nginx-websrv/volumes/config/conf.d/default.conf"
 
-    - name: Create the container init scripts
-      ansible.builtin.template:
-        src: "templates/servicectl.sh.j2"
-        dest: "{{ service_containers_dir }}/{{ service.name }}/scripts/servicectl.sh"
-        mode: 0755
-      loop: "{{ services }}"
-      loop_control:
-        loop_var: service
-
-    - name: Reload systemd
-      ansible.builtin.systemd:
-        daemon_reload: yes
-
-    - name: Start the container services
-      ansible.builtin.systemd:
-        name: "{{ service.name }}"
-        state: started
-        enabled: yes
+    - name: Run per-service configuration
+      include_tasks: tasks/deploy-microservices/per-service-config.yml
       loop: "{{ services }}"
       loop_control:
         loop_var: service

@@ -1,0 +1,15 @@
+---
+
+- name: Template chronyd config
+  ansible.builtin.template:
+    src: "templates/chrony.conf.j2"
+    dest: "/etc/chrony.conf"
+    backup: yes
+  register: chrony_conf
+
+- name: Restart the chronyd service
+  when: chrony_conf.changed
+  ansible.builtin.systemd:
+    name: chronyd
+    state: restarted
+    enabled: yes
