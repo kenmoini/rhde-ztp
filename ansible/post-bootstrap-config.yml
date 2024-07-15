@@ -238,7 +238,7 @@
           /usr/bin/az extension add --name k8s-configuration
           /usr/bin/az connectedk8s connect --name "{{ microshift_hostname }}" \
             --resource-group "{{ azureResourceGroup }}" \
-            --kube-config /kubeadmin/remote-config
+            --kube-config /kubeconfig/remote-config
         dest: "{{ ansible_env.HOME }}/.kube/az-connect.sh"
         owner: "{{ ansible_env.USER }}"
         group: "{{ ansible_env.USER }}"
