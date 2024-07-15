@@ -1,0 +1,77 @@
+---
+- name: Boot systems from an ISO via Redfish
+  hosts: localhost
+  gather_facts: false
+  vars:
+    use_site_configs: true
+    site_config_path: site-configs/redfish-systems
+    #site_config_name: "suki-mgmt" # comes from BMC hostname in job code
+
+    # iso_name: "rhel-9.4-x86_64-dvd.iso" # comes from job code
+    # http_server_ip: 192.168.99.12
+
+    iso_url: "http://{{ http_server_ip }}/isos/{{ iso_name }}"
+
+    debug_redfish: false
+
+    #bmc_hosts:
+      # SuperMicro Example
+      #- name: endurance
+      #  endpoint: endurance.mgmt.kemo.labs
+      #  username: ansible
+      #  password: n0tPassword
+      #  system_type: supermicro
+
+      # iDRAC8 Example
+      #- name: serenity
+      #  endpoint: serenity.mgmt.kemo.labs
+      #  username: ansible
+      #  password: n0tPassword
+      #  system_type: iDRAC8
+
+      # iDRAC9 Example
+      #- name: dell-per640
+      #  endpoint: 10.1.2.3
+      #  username: root
+      #  password: calvin
+      #  system_type: iDRAC9
+
+      # iLO5 Example
+      #- name: hpe-dl120-g10
+      #  endpoint: 10.1.2.3
+      #  username: Administrator
+      #  password: password
+      #  system_type: iLO5
+
+      # iLO4 Example
+      #- name: hpe-dl20-g9
+      #  endpoint: 10.1.2.3
+      #  username: Administrator
+      #  password: password
+      #  system_type: iLO4
+
+      # sushy-tools Example
+      #- name: 1baa7e2b-9cc6-426f-b0ab-d309b3030f57
+      #  endpoint: 192.168.42.40:8111
+      #  endpoint_protocol: http
+      #  system_type: sushy-tools
+
+  tasks:
+    - name: SITECONFIG - Read in site configs
+      when:
+        - use_site_configs | bool
+        - site_config_name is defined
+      ansible.builtin.include_vars:
+        dir: "site-configs/redfish-systems/{{ site_config_name }}"
+        extensions:
+          - 'yaml'
+          - 'yml'
+      tags:
+        - always
+
+    - name: Host entry point task
+      ansible.builtin.include_tasks:
+        file: tasks/redfish/host_entrypoint.yml
+      loop: "{{ bmc_hosts }}"
+      loop_control:
+        loop_var: host
