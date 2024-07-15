@@ -330,8 +330,7 @@ def listClaimedJobCodesRoute():
                                        json={"name": jobCodeInfo["hostname"],
                                              "inventory": aapPostBootstrapInventoryID,
                                              "enabled": True,
-                                             "variables": json.dumps({"ansible_host": provisionedIPAddress,
-                                                           "ansible_user": "root"})}, verify=False)
+                                             "variables": json.dumps({"ansible_host": provisionedIPAddress, "ansible_user": "root"})}, verify=False)
             # Check the status of the host creation
             if hostCreate.status_code != 201:
                 return json.dumps({"error": "Error creating host in AAP2 Controller"})
