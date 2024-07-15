@@ -65,7 +65,7 @@
     - name: Copy all the ISO files to the extracted path
       ansible.builtin.copy:
         src: "{{ target_iso_mount_path }}/{{ iso_base_name }}"
-        dest: "{{ target_iso_ext_path }}/{{ iso_base_name }}"
+        dest: "{{ target_iso_ext_path }}"
         remote_src: yes
         owner: nobody
         group: nobody
