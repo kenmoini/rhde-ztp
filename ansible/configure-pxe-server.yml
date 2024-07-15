@@ -26,7 +26,7 @@
     # /var/ftp/pub/pxe/install/x86_64/minimalrhel94/ext
     extract_iso_path: "{{ pxe_server_path }}/install/{{ architecture }}/{{ distro_key }}/ext"
     # /var/ftp/pub/pxe/install/x86_64/minimalrhel94/ext/minimal-rhel94
-    extract_iso_base_path: "{{ pxe_server_path }}/install/{{ architecture }}/{{ distro_key }}/ext/{{ iso_base_name }}"
+    extract_iso_base_path: "{{ pxe_server_path }}/install/{{ architecture }}/{{ distro_key }}/ext/{{ iso_base_name }}/{{ iso_base_name }}"
 
     # /var/ftp/pub/pxe/tftpboot/EFI/x86_64/rhel94/rhel94x8664
     efi_pxe_config_path: "{{ pxe_server_path }}/{{ tftp_sub_path }}/EFI/{{ architecture }}"
