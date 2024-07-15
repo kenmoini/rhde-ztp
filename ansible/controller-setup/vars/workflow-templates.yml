@@ -8,6 +8,7 @@ controller_workflows:
     ask_variables_on_launch: true
     extra_vars:
       use_site_configs: "true"
+      #image_name: "replace-me"
     survey: "{{ lookup('template', 'templates/image-builder-distribution-workflow_survey.json.j2') | regex_replace('\\n', '') }}"
     survey_enabled: true
     workflow_nodes:

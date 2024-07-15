@@ -13,6 +13,30 @@
         "variable": "site_config_name",
         "question_name": "Site Config Name",
         "type": "text"
-      }
+      },
+      {
+        "question_description": "What ISO image name to create",
+        "min": 0,
+        "default": "change-me",
+        "max": 255,
+        "required": true,
+        "choices": "",
+        "new_question": true,
+        "variable": "image_name",
+        "question_name": "Image Name",
+        "type": "text"
+      },
+      {
+        "question_description": "Device to install the OS to",
+        "min": 0,
+        "default": "/dev/sda",
+        "max": 255,
+        "required": false,
+        "choices": "",
+        "new_question": true,
+        "variable": "installation_device",
+        "question_name": "Installation Device",
+        "type": "text"
+      },
     ]
 }
