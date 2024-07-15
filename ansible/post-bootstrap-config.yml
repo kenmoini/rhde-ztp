@@ -6,7 +6,7 @@
     pull_secret: "json_here" # from Ansible Vault
 
     microshift_hostname: "{{ inventory_hostname }}"
-    microshift_base_domain: rhde.local
+    microshift_base_domain: kemo.edge
 
     microshift_config:
       network:
