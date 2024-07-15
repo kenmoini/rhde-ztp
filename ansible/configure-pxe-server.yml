@@ -47,9 +47,9 @@
         replace: "{{ item.replace }}"
       loop:
         - regexp: 'initrd /images/pxeboot/initrd.img'
-          replace: "initrd /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/initrd.img"
+          replace: "initrd /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ iso_base_name }}/initrd.img"
         - regexp: 'linux /images/pxeboot/vmlinuz'
-          replace: "linux /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/vmlinuz"
+          replace: "linux /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ iso_base_name }}/vmlinuz"
 
     #- name: Template EFI Boot Configuration
     #  template:
