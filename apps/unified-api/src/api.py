@@ -266,22 +266,18 @@ def createJobCodeClaimRoute():
         jobCodeInfo["iso_name"] = jobCodeData["config"]["iso_name"]
         jobCodeInfo["root_password"] = jobCodeData["config"]["root_password"]
         jobCodeInfo["ssh_pub_key"] = jobCodeData["config"]["ssh_pub_key"]
+        jobCodeInfo["boot_protocol"] = jobCodeData["config"]["boot_protocol"]
+        if jobCodeData["config"]["boot_protocol"] == "Redfish":
+            jobCodeInfo["bmc_hostname"] = jobCodeData["config"]["bmc_hostname"]
+            jobCodeInfo["bmc_domain"] = jobCodeData["config"]["bmc_domain"]
+            jobCodeInfo["bmc_ipv4_address"] = jobCodeData["config"]["bmc_ipv4_address"]
+            jobCodeInfo["bmc_ipv4_gateway"] = jobCodeData["config"]["bmc_ipv4_gateway"]
+            jobCodeInfo["bmc_ipv4_netmask"] = jobCodeData["config"]["bmc_ipv4_netmask"]
 
         # Kick off the Ansible Job Template that reconfigures the PXE server
         runJobTemplate = requests.post(aapControllerURL.replace('"','') + "/api/v2/job_templates/" + aapUpdatePXEJobTemplateID.replace('"','') + "/launch/",
                                         headers={"Authorization": "Bearer " + aapControllerToken.replace('"','')},
-                                        json={"extra_vars": json.dumps({"mac_address": macAddressInput,
-                                                           "ipv4_address": jobCodeInfo["ipv4_address"],
-                                                           "ipv4_gateway": jobCodeInfo["ipv4_gateway"],
-                                                           "ipv4_netmask": jobCodeInfo["ipv4_netmask"],
-                                                           "ipv4_dns": jobCodeInfo["ipv4_dns"],
-                                                           "ipv4_dns_search": jobCodeInfo["ipv4_dns_search"],
-                                                           "hostname": jobCodeInfo["hostname"],
-                                                           "domain": jobCodeInfo["domain"],
-                                                           "job_code": jobCodeInfo["job_code"],
-                                                           "iso_name": jobCodeInfo["iso_name"],
-                                                           "root_password": jobCodeInfo["root_password"],
-                                                           "ssh_pub_key": jobCodeInfo["ssh_pub_key"]})}, verify=False)
+                                        json={"extra_vars": json.dumps(jobCodeInfo)}, verify=False)
 
         if runJobTemplate.status_code != 201:
             return json.dumps({"status": "failed", "error": "Error launching job in AAP2 Controller"})
