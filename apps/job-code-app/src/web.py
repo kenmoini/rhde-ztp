@@ -120,6 +120,21 @@ with tab2:
         dns_search = st.text_input(label="DNS Search", placeholder="Comma separated")
         rootPassword = st.text_input(label="Root Password", type="password", placeholder="")
 
+    if bootProtocol == "Redfish":
+        st.divider()
+        col8, col9= st.columns(2)
+        with col8:
+            bmc_hostname = st.text_input(label="BMC Hostname", placeholder="edge-bmc")
+        with col9:
+            bmc_domain = st.text_input(label="BMC Domain", placeholder="mgmt.example.com")
+        col10, col11, col12 = st.columns(3)
+        with col10:
+            bmc_ipv4_address = st.text_input(label="BMC IPv4 Address", placeholder="192.168.46.10")
+        with col11:
+            bmc_ipv4_gateway = st.text_input(label="BMC IPv4 Gateway", placeholder="192.168.46.1")
+        with col12:
+            bmc_ipv4_netmask = st.text_input(label="BMC IPv4 Netmask", placeholder="255.255.255.0")
+
     submit_button = st.button(label="Create Job Code", type="primary")
 
 # Refresh Job Code List
@@ -148,23 +163,50 @@ if submit_button:
         root_password_hash = subprocess.run(["openssl", "passwd", "-6", root_password], stdout=subprocess.PIPE).stdout.decode().strip()
         #root_password_hash = passlib.hash.sha512_crypt.hash(root_password)
         # https://onlinephp.io/password-verify
-
-        job_code_data = {"config":
-            {
-                "job_code": job_code,
-                "boot_protocol": boot_protocol,
-                "iso_name": iso_name,
-                "hostname": hostname,
-                "domain": domain,
-                "ipv4_address": ipv4_address,
-                "ipv4_netmask": ipv4_netmask,
-                "ipv4_gateway": ipv4_gateway,
-                "ipv4_dns_server": ipv4_dns_server,
-                "ipv4_dns_search": ipv4_dns_search,
-                "ssh_pub_key": ssh_pub_key,
-                "root_password": root_password_hash
+        if boot_protocol == "Redfish":
+            bmc_hostname = f"{bmc_hostname}"
+            bmc_domain = f"{bmc_domain}"
+            bmc_ipv4_address = f"{bmc_ipv4_address}"
+            bmc_ipv4_gateway = f"{bmc_ipv4_gateway}"
+            bmc_ipv4_netmask = f"{bmc_ipv4_netmask}"
+            job_code_data = {"config":
+                {
+                    "job_code": job_code,
+                    "boot_protocol": boot_protocol,
+                    "iso_name": iso_name,
+                    "hostname": hostname,
+                    "domain": domain,
+                    "ipv4_address": ipv4_address,
+                    "ipv4_netmask": ipv4_netmask,
+                    "ipv4_gateway": ipv4_gateway,
+                    "ipv4_dns_server": ipv4_dns_server,
+                    "ipv4_dns_search": ipv4_dns_search,
+                    "ssh_pub_key": ssh_pub_key,
+                    "root_password": root_password_hash,
+                    "bmc_hostname": bmc_hostname,
+                    "bmc_domain": bmc_domain,
+                    "bmc_ipv4_address": bmc_ipv4_address,
+                    "bmc_ipv4_gateway": bmc_ipv4_gateway,
+                    "bmc_ipv4_netmask": bmc_ipv4_netmask
+                }
             }
-        }
+        else:
+            job_code_data = {"config":
+                {
+                    "job_code": job_code,
+                    "boot_protocol": boot_protocol,
+                    "iso_name": iso_name,
+                    "hostname": hostname,
+                    "domain": domain,
+                    "ipv4_address": ipv4_address,
+                    "ipv4_netmask": ipv4_netmask,
+                    "ipv4_gateway": ipv4_gateway,
+                    "ipv4_dns_server": ipv4_dns_server,
+                    "ipv4_dns_search": ipv4_dns_search,
+                    "ssh_pub_key": ssh_pub_key,
+                    "root_password": root_password_hash
+                }
+            }
         response = requests.post(backendAPI + "/createJobCode", json=job_code_data, verify=False)
         #container_output = st.empty()
         # print out the job code
