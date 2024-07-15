@@ -1,6 +1,7 @@
 ---
 - name: Post-bootstrap Configuration of RHDE Nodes
   hosts: all
+  gather_facts: false
 
   vars:
     pull_secret: "json_here" # from Ansible Vault
@@ -27,17 +28,20 @@
 
   tasks:
 
+    - name: Wait for the system to come online in case it just rebooted
+      ansible.builtin.wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: Include setup facts
+      ansible.builtin.setup:
+
     - name: Include vaulted variables
       ansible.builtin.include_vars:
         file: "{{ item }}"
       loop:
         - vault-vars/azure-sp.yml
         - vault-vars/microshift-pull-secret.yml
-
-    - name: Wait for the system to come online in case it just rebooted
-      ansible.builtin.wait_for_connection:
-        delay: 10
-        timeout: 300
 
     - name: Detect non-bootdisk
       block:
