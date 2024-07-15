@@ -256,6 +256,7 @@ def createJobCodeClaimRoute():
         jobCodeFile.close()
         jobCodeInfo = {}
         jobCodeInfo["job_code"] = jobCode
+        jobCodeInfo["mac_address"] = macAddressInput
         jobCodeInfo["ipv4_address"] = jobCodeData["config"]["ipv4_address"]
         jobCodeInfo["ipv4_gateway"] = jobCodeData["config"]["ipv4_gateway"]
         jobCodeInfo["ipv4_netmask"] = jobCodeData["config"]["ipv4_netmask"]
