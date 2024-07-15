@@ -40,16 +40,16 @@
         mode: 0644
         remote_src: yes
 
-    - name: Replace values in the file
-      ansible.builtin.replace:
-        path: "{{ efi_pxe_config_path }}/grub.cfg-01-{{ mac_address_dashes_lower }}"
-        regexp: "{{ item.regexp }}"
-        replace: "{{ item.replace }}"
-      loop:
-        - regexp: 'initrd /images/pxeboot/initrd.img'
-          replace: "initrd /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/initrd.img"
-        - regexp: 'linux /images/pxeboot/vmlinuz'
-          replace: "linux /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/vmlinuz"
+    #- name: Replace values in the file
+    #  ansible.builtin.replace:
+    #    path: "{{ efi_pxe_config_path }}/grub.cfg-01-{{ mac_address_dashes_lower }}"
+    #    regexp: "{{ item.regexp }}"
+    #    replace: "{{ item.replace }}"
+    #  loop:
+    #    - regexp: 'initrd /images/pxeboot/initrd.img'
+    #      replace: "initrd /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/initrd.img"
+    #    - regexp: 'linux /images/pxeboot/vmlinuz'
+    #      replace: "linux /{{ boot_architecture }}/{{ architecture }}/{{ distro_key }}/{{ distro_arch_key }}/vmlinuz"
 
     #- name: Template EFI Boot Configuration
     #  template:
