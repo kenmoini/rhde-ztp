@@ -74,18 +74,21 @@
         src: templates/setup-dns-server/servicectl.sh.j2
         dest: "{{ service_base_dir }}/{{ service_name }}/scripts/servicectl.sh"
         mode: 0755
+      register: template_servicectl
 
     - name: Template the bind configuration file
       ansible.builtin.template:
         src: templates/setup-dns-server/named.conf.j2
         dest: "{{ service_base_dir }}/{{ service_name }}/volumes/vendor-config/named.conf"
         mode: 0644
+      register: template_named_conf
 
     - name: Template the GoZones configuration file
       ansible.builtin.template:
         src: templates/setup-dns-server/go-zones.conf.j2
         dest: "{{ service_base_dir }}/{{ service_name }}/volumes/etc-config/server.conf"
         mode: 0644
+      register: template_go_zones_config
 
     - name: Template the systemd unit file
       ansible.builtin.template:
@@ -94,6 +97,7 @@
         mode: 0644
         owner: root
         group: root
+      register: template_unit_file
 
     - name: Reload systemd
       ansible.builtin.systemd:
@@ -104,9 +108,10 @@
         name: quay.io/kenmoini/go-zones:file-to-bind-latest
         pull: yes
         force: yes
+      register: image_pull
 
     - name: Start and enable the service
       ansible.builtin.systemd:
         name: "{{ service_name }}"
-        state: started
+        state: "{{ 'restarted' if template_unit_file.changed or image_pull.changed or template_servicectl.changed or template_named_conf.changed or template_go_zones_config.changed else 'started'}}"
         enabled: yes
