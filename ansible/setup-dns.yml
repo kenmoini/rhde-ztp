@@ -56,11 +56,11 @@
         value: 192.168.99.18/24
 
       - name: buzz-lightyear
-        value: 192.168.99.40/24
+        value: 192.168.99.30/24
       - name: cabbage
-        value: 192.168.99.41/24
+        value: 192.168.99.31/24
       - name: suki
-        value: 192.168.99.42/24
+        value: 192.168.99.32/24
 
       - name: suki-mgmt
         value: 192.168.99.46/24

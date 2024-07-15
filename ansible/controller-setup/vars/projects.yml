@@ -9,3 +9,13 @@ controller_projects:
     scm_type: git
     scm_update_on_launch: 'no'
     scm_url: "{{ project_scm_url }}"
+
+#  - name: RHDE Redfish
+#    organization: "{{ global_organization }}"
+#    scm_branch: main
+#    default_environment: ansible-redfish
+#    scm_clean: 'yes'
+#    scm_delete_on_update: 'no'
+#    scm_type: git
+#    scm_update_on_launch: 'no'
+#    scm_url: "{{ redfish_project_scm_url }}"

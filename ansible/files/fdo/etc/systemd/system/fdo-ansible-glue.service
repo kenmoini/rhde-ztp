@@ -3,4 +3,4 @@ Description=FDO Ansible Glue Service
 
 [Service]
 Type=oneshot
-ExecStart=/var/local/glue-init.sh
+ExecStart=/etc/glue-init.sh

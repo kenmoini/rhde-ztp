@@ -38,8 +38,8 @@
 
     architecture: x86_64
     target_iso_path: /opt/isos
-    target_repo_path: /opt/ostree
-    ostree_mirror_url: "http://192.168.99.12/ostree/repo"
+    target_repo_path: "/opt/ostree/{{ image_name }}"
+    ostree_mirror_url: "http://192.168.99.12/ostree/{{ image_name }}/repo"
     #ostree_image_ref: rhel/8/x86_64/edge
     ostree_image_ref: rhel/9/x86_64/edge
 
@@ -115,6 +115,11 @@
           - 'yml'
       tags:
         - always
+
+    - name: Create repo path
+      ansible.builtin.file:
+        path: "{{ target_repo_path }}"
+        state: directory
 
     - name: Create blueprints
       when: create_blueprints

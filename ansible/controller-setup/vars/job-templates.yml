@@ -85,7 +85,7 @@ controller_templates:
   - name: Post-bootstrap RHDE Configuration
     organization: "{{ global_organization }}"
     job_type: run
-    inventory: RHDEInfrastructure
+    inventory: RHDESystems
     execution_environment: rhde-ztp-edge
     project: RHDE ZTP
     playbook: ansible/post-bootstrap-config.yml
@@ -94,5 +94,17 @@ controller_templates:
     become_enabled: true
     credentials:
       - RHDESystems
+      - RHDEVault
+
+  - name: Redfish Boot Systems to ISO
+    organization: "{{ global_organization }}"
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: ansible-redfish
+    project: RHDE ZTP
+    playbook: ansible/boot-redfish-system.yml
+    ask_variables_on_launch: true
+    become_enabled: true
+    credentials:
       - RHDEVault
 

@@ -11,6 +11,7 @@
 
     # Change to your fork of the RHDE ZTP project
     project_scm_url: https://github.com/kenmoini/rhde-ztp
+    #redfish_project_scm_url: https://github.com/kenmoini/ansible-redfish
 
     # If not using the default organization, change this to the organization name that you have created
     global_organization: Default

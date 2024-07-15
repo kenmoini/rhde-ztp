@@ -2,3 +2,5 @@
 controller_execution_environments:
   - name: rhde-ztp-edge
     image: quay.io/kenmoini/rhde-ztp-ee:latest
+  - name: ansible-redfish
+    image: quay.io/kenmoini/ansible-redfish-ee:latest

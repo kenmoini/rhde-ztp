@@ -18,6 +18,7 @@
 
     pxe_tftp_path: /var/ftp/pub/pxe/tftpboot
     # eg /var/ftp/pub/pxe/install/x86_64/rhel94/ext
+    target_iso_mount_path: "/var/ftp/pub/pxe/install/{{ architecture }}/{{ distro_key }}/mount"
     target_iso_ext_path: "/var/ftp/pub/pxe/install/{{ architecture }}/{{ distro_key }}/ext"
     # eg /var/ftp/pub/pxe/tftpboot/EFI/x86_64/rhel94/rhel94x8664
     target_pxe_path: "{{ pxe_tftp_path }}/{{ boot_protocol }}/{{ architecture }}/{{ distro_key }}/{{ iso_base_name }}"
@@ -28,18 +29,20 @@
         path: "{{ item }}"
         state: directory
       loop:
-        - "{{ target_iso_ext_path }}/{{ iso_base_name }}/images/pxeboot"
         - "{{ target_pxe_path }}"
+        - "{{ target_iso_mount_path }}"
+        - "{{ target_iso_ext_path }}/{{ iso_base_name }}"
+        #- "{{ target_iso_ext_path }}/{{ iso_base_name }}/images/pxeboot"
 
     - name: Unmount the ISO if it is already mounted
       ansible.posix.mount:
-        path: "{{ target_iso_ext_path }}/{{ iso_base_name }}"
+        path: "{{ target_iso_mount_path }}/{{ iso_base_name }}"
         state: unmounted
       ignore_errors: yes
 
     - name: Mount the ISO to the mounting directory
       ansible.posix.mount:
-        path: "{{ target_iso_ext_path }}/{{ iso_base_name }}"
+        path: "{{ target_iso_mount_path }}/{{ iso_base_name }}"
         src: "{{ iso_src }}/{{ iso_name }}"
         fstype: iso9660
         opts: ro,loop
@@ -48,7 +51,8 @@
 
     - name: Copy kernel and initramfs files for EFI boot
       ansible.builtin.copy:
-        src: "{{ target_iso_ext_path }}/{{ iso_base_name }}/images/pxeboot/{{ item }}"
+        #src: "{{ target_iso_ext_path }}/{{ iso_base_name }}/images/pxeboot/{{ item }}"
+        src: "{{ target_iso_mount_path }}/{{ iso_base_name }}/images/pxeboot/{{ item }}"
         dest: "{{ target_pxe_path }}/{{ item }}"
         remote_src: yes
         owner: nobody
@@ -57,3 +61,12 @@
       loop:
         - "{{ efi_kernel }}"
         - "{{ efi_initrd }}"
+
+    - name: Copy all the ISO files to the extracted path
+      ansible.builtin.copy:
+        src: "{{ target_iso_mount_path }}/{{ iso_base_name }}"
+        dest: "{{ target_iso_ext_path }}/{{ iso_base_name }}"
+        remote_src: yes
+        owner: nobody
+        group: nobody
+        mode: 0644
