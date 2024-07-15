@@ -201,7 +201,7 @@
       ansible.builtin.systemd:
         name: microshift
         enabled: true
-        state: "{{ microshift_state }}"
+        state: "started"
 
     - name: Make a .kube folder
       ansible.builtin.file:
