@@ -29,6 +29,15 @@ twilioAuthToken = os.environ.get("TWILIO_AUTH_TOKEN", "")
 twilioFromNumber = os.environ.get("TWILIO_FROM_NUMBER", "")
 
 ##############################
+# Setup Textbelt Variables
+textbeltAPIKey = os.environ.get("TEXTBELT_API_KEY", "")
+
+##############################
+# Setup SMTP Variables
+smtp_sender = os.environ.get("SMTP_FROM_ADDRESS", "")
+smtp_password = os.environ.get("SMTP_PASSWORD", "")
+
+##############################
 # Setup application variables
 isoPath = os.environ.get("ISO_PATH", "/opt/isos")
 jobCodePath = os.environ.get("JOB_CODE_PATH", "/opt/job-codes")
@@ -63,18 +72,25 @@ def sendTextMessage(toNumber, msgBody):
     return message
 
 ##############################
+# Send a message with the Textbelt API
+def sendTextBeltMessage(toNumber, msgBody):
+    response = requests.post('https://textbelt.com/text', {
+        'phone': toNumber,
+        'message': msgBody,
+        'key': textbeltAPIKey,
+    })
+    return response.json()
+
+##############################
 # Send an email with SMTP
 def send_email(subject, body, recipients):
-    sender = os.environ.get("SMTP_FROM_ADDRESS", "")
-    password = os.environ.get("SMTP_PASSWORD", "")
-
     msg = MIMEText(body)
     msg['Subject'] = subject
-    msg['From'] = sender
+    msg['From'] = smtp_sender
     msg['To'] = ', '.join(recipients)
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(sender, password)
-        smtp_server.sendmail(sender, recipients, msg.as_string())
+        smtp_server.login(smtp_sender, smtp_password)
+        smtp_server.sendmail(smtp_sender, recipients, msg.as_string())
     return "Message sent!"
 
 ##############################
@@ -173,22 +189,32 @@ def sendJobCode():
         jobCodeData = request.get_json()
 
         jobCode = jobCodeData['jobCode']
+        toNumber = jobCodeData['phone']
 
         emailAddress = jobCodeData['email']
         subject = "Notice: New Job Code Assignment"
         body = "Hello - you have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
         recipients = [emailAddress]
 
-        #toNumber = "+1" + jobCodeData['phone']
-        #txtMsgBody = "You have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
-        
-        # Send the text message
-        #if toNumber != "":
-        #    sid = sendTextMessage(toNumber, txtMsgBody)
-        #    # Return the JSON message
-        #    return json.dumps({"status": "success", "sid": sid.sid})
+        # Send the text message with Twilio or Textbelt
+        if toNumber != "":
+            if textbeltAPIKey != "" or (twilioAccountSid != "" and twilioAuthToken != ""):
+                toNumberCountryCode = "+1" + toNumber
+                txtMsgBody = "You have been assigned the Job Code: '" + jobCode + "'.  Use this link when provisioning the device: " + scannerAppURL + "?jobCode=" + jobCode
 
-        if emailAddress != "":
+                # Send the text message with Textbelt
+                if textbeltAPIKey != "":
+                    tbsend = sendTextMessage(toNumberCountryCode, txtMsgBody)
+                    # Return the JSON message
+                    return tbsend
+
+                # Send the text message with Twilio
+                if twilioAccountSid != "" and twilioAuthToken != "":
+                    sid = sendTextBeltMessage(toNumberCountryCode, txtMsgBody)
+                    # Return the JSON message
+                    return json.dumps({"status": "success", "sid": sid.sid})
+
+        if smtp_sender != "" and smtp_password != "" and emailAddress != "":
             # Send the email
             msg = send_email(subject, body, recipients)
             # Return the JSON message

@@ -45,15 +45,15 @@ else:
 # Send job code to person who will plug things in pop up modal
 @st.experimental_dialog("Send Job Code")
 def sendJobCode():
-    #phone = st.text_input("Phone Number")
+    phone = st.text_input("Phone Number")
     email = st.text_input("Email Address")
     jobCodeSelection = st.selectbox(
         "Which Job Code to send?",
         jobCodes["job_code"]
     )
     if st.button("Submit"):
-        #sendJobCodeResult = requests.post(backendAPI + "/sendJobCode", json={"jobCode": jobCodeSelection, "phone": phone}, verify=False)
-        sendJobCodeResult = requests.post(backendAPI + "/sendJobCode", json={"jobCode": jobCodeSelection, "email": email}, verify=False)
+        sendJobCodeResult = requests.post(backendAPI + "/sendJobCode", json={"jobCode": jobCodeSelection, "phone": phone, "email": email}, verify=False)
+        #sendJobCodeResult = requests.post(backendAPI + "/sendJobCode", json={"jobCode": jobCodeSelection, "email": email}, verify=False)
         if sendJobCodeResult.status_code == 200:
             st.write("Job Code Sent!")
         else:
