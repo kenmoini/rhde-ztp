@@ -234,6 +234,8 @@
         content: |
           #!/bin/bash
           /usr/bin/az login --service-principal -u "{{ azureServicePrincipalID }}" -p "{{ azureServicePrincipalClientSecret }}" --tenant "{{ azureTenantID }}"
+          /usr/bin/az extension add --name connectedk8s
+          /usr/bin/az extension add --name k8s-configuration
           /usr/bin/az connectedk8s connect --name "{{ microshift_hostname }}" \
             --resource-group "{{ azureResourceGroup }}" \
             --kube-config /kubeadmin/remote-config
@@ -251,7 +253,7 @@
     - name: Run the podman container to connect to Azure Arc...
       ansible.builtin.shell:
         cmd: |
-          podman run --rm -it --privileged -v {{ ansible_env.HOME }}/.kube:/kubeconfig quay.io/kenmoini/rhde-ztp-ee:latest /kubeconfig/az-connect.sh"
+          podman run --rm -it --privileged -v {{ ansible_env.HOME }}/.kube:/kubeconfig quay.io/kenmoini/rhde-ztp-ee:latest /kubeconfig/az-connect.sh
 
     #- name: Connect to Azure Arc
     #  ansible.builtin.shell:
