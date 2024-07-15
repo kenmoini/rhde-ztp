@@ -57,10 +57,24 @@
 
       - name: buzz-lightyear
         value: 192.168.99.30/24
+      - name: api.buzz-lightyear
+        value: 192.168.99.30
+      - name: "*.apps.buzz-lightyear"
+        value: 192.168.99.30
+
       - name: cabbage
         value: 192.168.99.31/24
+      - name: api.cabbage
+        value: 192.168.99.31
+      - name: "*.apps.cabbage"
+        value: 192.168.99.31
+
       - name: suki
         value: 192.168.99.32/24
+      - name: api.suki
+        value: 192.168.99.32
+      - name: "*.apps.suki"
+        value: 192.168.99.32
 
       - name: suki-mgmt
         value: 192.168.99.46/24
