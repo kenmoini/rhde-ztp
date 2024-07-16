@@ -57,6 +57,18 @@ controller_templates:
     credentials:
       - RHDEMGMT
 
+  - name: Configure ISC DHCP for specific MAC Address IPs
+    organization: "{{ global_organization }}"
+    job_type: run
+    inventory: RHDEInfrastructure
+    execution_environment: rhde-ztp-edge
+    project: RHDE ZTP
+    playbook: ansible/configure-isc-dhcpd-per-host.yml
+    become_enabled: true
+    ask_variables_on_launch: true
+    credentials:
+      - RHDEMGMT
+
   - name: Deploy Microservices to Edge Hub
     organization: "{{ global_organization }}"
     job_type: run

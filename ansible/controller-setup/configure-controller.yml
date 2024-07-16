@@ -36,14 +36,14 @@
         extensions: ["yml"]
 
   roles:
-    #- {role: infra.controller_configuration.execution_environments, when: controller_execution_environments is defined}
-    #- {role: infra.controller_configuration.credentials, when: controller_credentials is defined}
-    #- {role: infra.controller_configuration.applications, when: controller_applications is defined}
+    - {role: infra.controller_configuration.execution_environments, when: controller_execution_environments is defined}
+    - {role: infra.controller_configuration.credentials, when: controller_credentials is defined}
+    - {role: infra.controller_configuration.applications, when: controller_applications is defined}
 
-    #- {role: infra.controller_configuration.inventories, when: controller_inventories is defined}
-    #- {role: infra.controller_configuration.hosts, when: controller_hosts is defined}
-    #- {role: infra.controller_configuration.groups, when: controller_groups is defined}
+    - {role: infra.controller_configuration.inventories, when: controller_inventories is defined}
+    - {role: infra.controller_configuration.hosts, when: controller_hosts is defined}
+    - {role: infra.controller_configuration.groups, when: controller_groups is defined}
 
-    #- {role: infra.controller_configuration.projects, when: controller_projects is defined}
+    - {role: infra.controller_configuration.projects, when: controller_projects is defined}
     - {role: infra.controller_configuration.job_templates, when: controller_templates is defined}
     - {role: infra.controller_configuration.workflow_job_templates, when: controller_workflows is defined}

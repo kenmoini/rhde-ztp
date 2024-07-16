@@ -30,6 +30,7 @@
     aap2_rhde_infra_inventory_id: 4
     aap2_post_bootstrap_job_template_id: 18
     aap2_update_pxe_job_template_id: 15
+    aap2_job_claim_config_workflow_job_template_id: 25
 
     # ========================================================================
     # Optional vars to change in your environment
@@ -116,6 +117,8 @@
           value: "{{ aap2_post_bootstrap_job_template_id }}"
         - name: AAP_UPDATE_PXE_JOB_TEMPLATE_ID
           value: "{{ aap2_update_pxe_job_template_id }}"
+        - name: AAP_JOBCLAIM_CONFIG_WORKFLOW_TEMPLATE_ID
+          value: "{{ aap2_job_claim_config_workflow_job_template_id }}"
 
         - name: SCANNER_APP_URL
           value: "http://scanner-app.apps.{{ base_domain }}"

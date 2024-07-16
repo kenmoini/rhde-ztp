@@ -53,3 +53,26 @@ controller_workflows:
           type: job_template
           organization:
             name: "{{ global_organization }}"
+
+
+  - name: Job Claim Configuration
+    description: Configures PXE Grub and ISC DHCPD for boot configurations when a Job Code is claimed
+    organization:
+      name: "{{ global_organization }}"
+    inventory: RHDEInfrastructure
+    ask_variables_on_launch: true
+    workflow_nodes:
+      - all_parents_must_converge: false
+        identifier: configuredhcpd
+        unified_job_template:
+          name: Configure ISC DHCP for specific MAC Address IPs
+          type: job_template
+          organization:
+            name: "{{ global_organization }}"
+      - all_parents_must_converge: false
+        identifier: configurepxegrub
+        unified_job_template:
+          name: Configure PXE Server for specific MAC Address boots
+          type: job_template
+          organization:
+            name: "{{ global_organization }}"
