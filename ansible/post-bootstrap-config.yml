@@ -104,13 +104,17 @@
           ansible.builtin.set_fact:
             lvm_device: "/dev/{{ disks | first }}"
 
+        - name: Debug
+          ansible.builtin.debug:
+            var: lvm_device
+
     - name: Enable SELinux
       ansible.posix.selinux:
         policy: targeted
         state: enforcing
 
     - name: Configure new LVM Volume Group with the second disk
-      when: no_additional_devices == 'false'
+      when: not no_additional_devices
       ansible.builtin.lvg:
         vg: "{{ lvm_vg_name }}"
         pvs: "{{ lvm_device }}"
@@ -133,7 +137,7 @@
         mode: 0644
 
     - name: Template the LMVO configuration
-      when: no_additional_devices == 'false'
+      when: not no_additional_devices
       ansible.builtin.template:
         src: templates/lvmd.yaml.j2
         dest: /etc/microshift/lvmd.yaml
