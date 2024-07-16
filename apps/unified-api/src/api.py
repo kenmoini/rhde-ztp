@@ -47,6 +47,7 @@ aapControllerToken = os.environ.get("AAP_CONTROLLER_TOKEN", "")
 
 aapPostBootstrapJobTemplateID = os.environ.get("AAP_POST_BOOTSTRAP_JOB_TEMPLATE_ID", "123456")
 aapUpdatePXEJobTemplateID = os.environ.get("AAP_UPDATE_PXE_JOB_TEMPLATE_ID", "123456")
+aapJobClaimConfigurationWorkflowJobTemplateID = os.environ.get("AAP_JOBCLAIM_CONFIG_WORKFLOW_TEMPLATE_ID", "123456")
 
 aapPostBootstrapInventoryID = os.environ.get("AAP_POST_BOOTSTRAP_INVENTORY_ID", "123456")
 aapUpdatePXEInventoryID = os.environ.get("AAP_RHDE_INFRA_INVENTORY_ID", "123456")
@@ -276,11 +277,16 @@ def createJobCodeClaimRoute():
             jobCodeInfo["bmc_ipv4_netmask"] = jobCodeData["config"]["bmc_ipv4_netmask"]
 
         # Kick off the Ansible Job Template that reconfigures the PXE server
-        runJobTemplate = requests.post(aapControllerURL.replace('"','') + "/api/v2/job_templates/" + aapUpdatePXEJobTemplateID.replace('"','') + "/launch/",
+        #runJobTemplate = requests.post(aapControllerURL.replace('"','') + "/api/v2/job_templates/" + aapUpdatePXEJobTemplateID.replace('"','') + "/launch/",
+        #                                headers={"Authorization": "Bearer " + aapControllerToken.replace('"','')},
+        #                                json={"extra_vars": json.dumps(jobCodeInfo)}, verify=False)
+
+        # Kick off the Ansible Workflow Job Template that reconfigures ISC DHCPD and PXE Grub Config
+        runWorkflowJobTemplate = requests.post(aapControllerURL.replace('"','') + "/api/v2/workflow_job_templates/" + aapJobClaimConfigurationWorkflowJobTemplateID.replace('"','') + "/launch/",
                                         headers={"Authorization": "Bearer " + aapControllerToken.replace('"','')},
                                         json={"extra_vars": json.dumps(jobCodeInfo)}, verify=False)
 
-        if runJobTemplate.status_code != 201:
+        if runWorkflowJobTemplate.status_code != 201:
             return json.dumps({"status": "failed", "error": "Error launching job in AAP2 Controller"})
         else:
             # Return the JSON message
