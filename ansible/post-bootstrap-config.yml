@@ -91,9 +91,13 @@
           ansible.builtin.debug:
             var: disks
 
-        - name: Set a fact if a device was not detected
+        - name: Set a fact if an additional storage device was not detected
           ansible.builtin.set_fact:
-            no_additional_devices: "{{ 'true' if disks | length == 0 else 'false' }}"
+            no_additional_devices: "{{ 'true' if (disks | length == 0) else 'false' }}"
+
+        - name: Debug
+          ansible.builtin.debug:
+            var: no_additional_devices
 
         - name: Set the lvm_device
           when: no_additional_devices == 'false'
