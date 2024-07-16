@@ -6,7 +6,7 @@
 
   vars:
     #mac_address: "" # This is provided by an input variable
-    #ip_address: "" # This is provided by an input variable
+    #ipv4_address: "" # This is provided by an input variable
     #hostname: "" # This is provided by an input variable
     #domain: "" # This is provided by an input variable
     mac_address_lower: "{{ mac_address | lower }}"
