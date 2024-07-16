@@ -100,7 +100,7 @@
             var: no_additional_devices
 
         - name: Set the lvm_device
-          when: no_additional_devices == 'false'
+          when: not no_additional_devices
           ansible.builtin.set_fact:
             lvm_device: "/dev/{{ disks | first }}"
 
