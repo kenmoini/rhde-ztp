@@ -278,6 +278,10 @@
         cmd: |
           sleep 10
           podman run --rm -it --privileged -v {{ ansible_env.HOME }}/.kube:/kubeconfig quay.io/kenmoini/rhde-ztp-ee:latest /kubeconfig/az-connect.sh
+      retries: 3
+      delay: 3
+      register: result
+      until: result.rc == 0
 
     #- name: Connect to Azure Arc
     #  ansible.builtin.shell:
