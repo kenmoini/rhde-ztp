@@ -117,6 +117,32 @@
               system = false
               rhsm = true
 
+        - name: Create codeready-builder.toml configuration file
+          copy:
+            dest: "/tmp/codeready-builder.toml"
+            content: |
+              id = "codeready-builder"
+              name = "CodeReady Builder for RHEL 9"
+              type = "yum-baseurl"
+              url = "https://cdn.redhat.com/content/dist/rhel9/9.4/{{ ansible_architecture }}/codeready-builder/os"
+              check_gpg = true
+              check_ssl = true
+              system = false
+              rhsm = true
+
+        - name: Create epel.toml configuration file
+          copy:
+            dest: "/tmp/epel.toml"
+            content: |
+              id = "epel"
+              name = "EPEL for RHEL 9"
+              type = "yum-metalink"
+              url = "https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch&infra=$infra&content=$contentdir"
+              check_gpg = false
+              check_ssl = true
+              system = false
+              rhsm = false
+
         - name: Add sources to Image Builder
           command: "sudo composer-cli sources add {{ item }}"
           loop:
@@ -124,6 +150,8 @@
             - "/tmp/fast-datapath.toml"
             - "/tmp/nvidia-cuda.toml"
             - "/tmp/nvidia-cdk.toml"
+            - "/tmp/codeready-builder.toml"
+            - "/tmp/epel.toml"
             #- "/tmp/nvidia-cdk-ex.toml"
 
         - name: Enable OCP repo on the host for Microshift

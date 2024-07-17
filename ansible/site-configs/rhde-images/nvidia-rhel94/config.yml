@@ -1,0 +1,75 @@
+---
+image_name: "nvidia-rhel94-image"
+image_description: "Blueprint for building the RHDE image with Microshift and NVIDIA bits preloaded"
+image_version: "1.0.0"
+image_distro: rhel-94
+architecture: x86_64 #  only x86_64 is supported right now lol
+
+blueprint_file: minimal-blueprint.toml
+
+ostree_image_ref: rhel/9/x86_64/edge
+#ostree_mirror_url: "http://192.168.99.12/ostree/repo"
+
+fdo_manufacturing_server_url:  "http://192.168.99.10:8080"
+installation_device: /dev/vda
+kernel_options: "modprobe.blacklist=nouveau"
+
+packages:
+  - cockpit
+  - cockpit-storaged
+  - openssh-server
+  - microshift
+  - microshift-greenboot
+  - microshift-networking
+  - microshift-olm
+  - microshift-olm-release-info
+  - microshift-release-info
+  - microshift-selinux
+  - selinux-policy
+  - selinux-policy-targeted
+  - setroubleshoot-server
+  - nvidia-container-toolkit
+  - gcc
+  - "gcc-c++"
+  - kernel-devel
+  - kernel-headers
+  - cuda
+  - cuda-toolkit
+
+services:
+  enabled:
+    - sshd
+    - cockpit.socket
+
+timezone: America/New_York
+ntp_servers:
+  - time.apple.com
+  - time1.apple.com
+  - time2.apple.com
+
+root_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB"
+
+extra_users:
+  - name: ansible
+    password: password123
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB"
+    groups:
+      - wheel
+  - name: shift
+    password: password123
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/UQ6SVJ0Jk/fDfLpecIIIfTe3+Ry+oaF8AFKAZwXJ8xMMmrPcPX1JTb4k/keVPT5liqYLb6pxO9yKUb1fLIKXQj+6OaDFaq7J8O3ad5AjpwMH97pynPtjUnltDIPbMTLOUHMZCrvF/PIn0iQ2lfl48lADD/S/tOPh34TI8fv+miuCO7Gdsk9DqT9SxIRG4oKj7ZKp/PKyWuPheRhJ0KiSeFIHR3dXSJnLiL+JkdBotB4IK78Pygwo6P6Wyl2P4gobkKhy/YuTiSImbaN0G8YMJrUu1EzYQ5QlmNqPKVuFH8te41vxmTX47N5h8vfO9c00YFC5H9mtsPMGXYRTiRkB"
+    groups:
+      - wheel
+
+firewall:
+  ports:
+    - 6443:tcp
+  services:
+    enabled:
+      - ssh
+      - cockpit
+  zones:
+    - name: trusted
+      sources:
+        - "10.42.0.0/16"
+        - "169.254.169.1"
