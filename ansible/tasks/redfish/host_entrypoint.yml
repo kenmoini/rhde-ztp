@@ -11,8 +11,8 @@
     validate_certs: false
   register: ping_result
   until: ping_result.status == 401
-  retries: 3
-  delay: 1
+  retries: 300
+  delay: 10
 
 - name: Eject Virtual Media
   ansible.builtin.include_tasks:
