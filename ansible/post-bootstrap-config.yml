@@ -25,6 +25,7 @@
 
     connect_to_azure_arc: true
     azureResourceGroup: AzureArcTest
+    arc_connector_image: quay.io/kenmoini/rhde-ztp-ee:latest
 
   tasks:
 
@@ -277,7 +278,7 @@
       ansible.builtin.shell:
         cmd: |
           sleep 10
-          podman run --name arc-connector -it --privileged -v {{ ansible_env.HOME }}/.kube:/kubeconfig quay.io/kenmoini/rhde-ztp-ee:latest /kubeconfig/az-connect.sh
+          podman run --name arc-connector -it --privileged -v {{ ansible_env.HOME }}/.kube:/kubeconfig {{ arc_connector_image }} /kubeconfig/az-connect.sh
       retries: 3
       delay: 3
       register: result
