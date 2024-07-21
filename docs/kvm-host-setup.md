@@ -13,7 +13,7 @@ cat /etc/sysconfig/selinux.bak | sed s/SELINUX=enforcing/SELINUX=disabled/g > /e
 echo "options vfio_iommu_type1 allow_unsafe_interrupts=1" > /etc/modprobe.d/unsafe-interrupts.conf
 
 # Set bridge udev rules
-echo 'ACTION=="add", SUBSYSTEM=="module", KERNEL=="br_netfilter", RUN+="/sbin/sysctl -p /etc/sysctl.d/bridge.conf"' > /etc/udev/rules.d/99-bridge.rules
+echo 'ACTION=="add", SUBSYSTEM=="module", KERNEL=="br_netfilter", RUN+="/sbin/sysctl -p /etc/sysctl.d/libvirt-nf-bridge.conf"' > /etc/udev/rules.d/99-bridge.rules
 
 # Set nf bridge config
 cat > /etc/sysctl.d/libvirt-nf-bridge.conf <<EOF
