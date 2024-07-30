@@ -12,9 +12,10 @@
       - jq
 
     microshift_release: "4.15"
-    pull_secret_location: remote # local | remote
+    # pull_secret_location: local | remote
+    pull_secret_location: remote
     # pull_secret is used for local lookups
-    pull_secret: "{{ lookup('file', '/opt/rh-pull-secret.json') }}"
+    #pull_secret: "{{ lookup('file', '/opt/rh-pull-secret.json') }}"
     # pull_secret_path is used for remote lookups
     pull_secret_path: /opt/rh-pull-secret.json
 
