@@ -221,7 +221,7 @@
             dest: /etc/osbuild-worker/pull-secret.json
 
         - name: Put pull_secret into /etc/osbuild-worker/pull-secret.json - remote
-          when: pull_secret is defined pull_secret_location == "remote"
+          when: pull_secret_path is defined and pull_secret_location == "remote"
           copy:
             content: "{{ pull_secret_slurp['content'] | b64decode }}"
             dest: /etc/osbuild-worker/pull-secret.json
