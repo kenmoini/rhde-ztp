@@ -21,10 +21,10 @@ packages:
   - microshift
   - microshift-greenboot
   - microshift-networking
-  - microshift-olm
-  - microshift-olm-release-info
   - microshift-release-info
   - microshift-selinux
+  #- microshift-olm
+  #- microshift-olm-release-info
   - selinux-policy
   - selinux-policy-targeted
   - setroubleshoot-server
