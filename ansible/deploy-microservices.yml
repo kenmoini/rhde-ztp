@@ -77,6 +77,14 @@
         ip: "registry.{{ base_domain }}"
         port: 5000
 
+    enabled_services:
+      - nginx-websrv
+      #- haproxy-ingress
+      #- registry
+      #- unified-api
+      #- scanner-app
+      #- job-code-web
+
     services:
       - name: unified-api
         image: "{{ unifiedAPIContainer }}"
@@ -310,7 +318,7 @@
         #- "{{ service_containers_dir }}/lab-chronyd/volumes/chrony"
         #- "{{ service_containers_dir }}/lab-chronyd/config"
 
-    - name: Set permissionss on shared directories
+    - name: Set permissions on shared directories
       ansible.builtin.file:
         path: "{{ item }}"
         mode: 0777
@@ -322,21 +330,25 @@
         - "/opt/registry"
 
     - name: Make the registry htpasswd file
+      when: mirror_htpasswd is defined
       ansible.builtin.copy:
         content: "{{ mirror_htpasswd }}"
         dest: "{{ service_containers_dir }}/shared/volumes/certs/registry.htpasswd"
 
     - name: Make the registry pull secret file
+      when: mirror_pull_secret is defined
       ansible.builtin.copy:
         content: "{{ mirror_pull_secret }}"
         dest: "{{ service_containers_dir }}/shared/volumes/certs/pull-secret.json"
 
     - name: Copy the root cert to the web dropbox
+      when: root_ca_cert_file_path is defined
       ansible.builtin.copy:
         src: "{{ root_ca_cert_file_path }}"
         dest: "/opt/dropbox/root-ca.pem"
 
     - name: Copy the root cert to the web dropbox in crt format
+      when: "{{ 'haproxy-ingress' in enabled_services }}"
       ansible.builtin.copy:
         src: "{{ root_ca_cert_file_path }}"
         dest: "/opt/dropbox/root-ca.crt"
@@ -345,31 +357,37 @@
       include_tasks: tasks/deploy-microservices/configure-on-host-chrony.yml
 
     - name: Template the scanner app config
+      when: "{{ 'scanner-app' in enabled_services }}"
       ansible.builtin.template:
         src: "templates/scanner-app.config.js.j2"
         dest: "{{ service_containers_dir }}/scanner-app/volumes/config/frontend-connection.js"
 
     - name: Copy the wildcard certificate to the host
+      when: "{{ 'haproxy-ingress' in enabled_services }}"
       ansible.builtin.copy:
         src: "{{ wildcard_cert_file_path }}"
         dest: "{{ service_containers_dir }}/shared/volumes/certs/haproxy_wildcard.pem"
 
     - name: Template the HAProxy config file over
+      when: "{{ 'haproxy-ingress' in enabled_services }}"
       ansible.builtin.template:
         src: "templates/haproxy.cfg.j2"
         dest: "{{ service_containers_dir }}/haproxy-ingress/volumes/config/haproxy.cfg"
 
     - name: Template the HAProxy crtlist file over
+      when: "{{ 'haproxy-ingress' in enabled_services }}"
       ansible.builtin.template:
         src: "templates/crt-list.cfg.j2"
         dest: "{{ service_containers_dir }}/haproxy-ingress/volumes/config/crt-list.cfg"
 
     - name: Template nginx default config
+      when: "{{ 'nginx-websrv' in enabled_services }}"
       ansible.builtin.template:
         src: "templates/nginx.default.conf.j2"
         dest: "{{ service_containers_dir }}/nginx-websrv/volumes/config/conf.d/default.conf"
 
     - name: Run per-service configuration
+      when: service.name in enabled_services
       include_tasks: tasks/deploy-microservices/per-service-config.yml
       loop: "{{ services }}"
       loop_control:
@@ -380,6 +398,7 @@
         chmod -R a+r /var/ftp/pub/pxe/tftpboot/
 
     - name: Pull and push containers
+      when: "{{  'registry' in enabled_services }}"
       ansible.builtin.shell: |
         podman tag {{ item }} {{ item | replace('quay.io', 'registry.apps.'+ base_domain) | replace('docker.io', 'registry.apps.' + base_domain) }}
         podman push --authfile {{ service_containers_dir }}/shared/volumes/certs/pull-secret.json {{ item | replace('quay.io', 'registry.apps.' + base_domain) | replace('docker.io', 'registry.apps.' + base_domain) }}
