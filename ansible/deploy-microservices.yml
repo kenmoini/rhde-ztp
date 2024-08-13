@@ -344,7 +344,7 @@
         dest: "{{ service_containers_dir }}/shared/volumes/certs/pull-secret.json"
 
     - name: Copy the root cert to the web dropbox
-      when: root_ca_cert_file_path is defined
+      when: root_ca_cert_file_path is defined and deploy_pki
       ansible.builtin.copy:
         src: "{{ root_ca_cert_file_path }}"
         dest: "/opt/dropbox/root-ca.pem"
