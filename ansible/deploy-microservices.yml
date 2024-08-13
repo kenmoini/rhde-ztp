@@ -21,6 +21,7 @@
     registry_ip_address: 192.168.99.18
 
     # Create a PKI first with the scripts in the pki-the-hard-way directory
+    deploy_pki: false
     root_ca_cert_file_path: ../pki-the-hard-way/.pki/root-ca/public_bundles/certs/kemo-labs-certificate-authority.cert.pem
     wildcard_cert_file_path: "../pki-the-hard-way/.pki/root-ca/intermediates/kemo-labs-intermediate-certificate-authority/signing/kemo-labs-edge-sca/certs/bundle_haproxy-edge-hub.{{ base_domain }}.cert.pem"
 
@@ -255,6 +256,7 @@
 
   tasks:
     - name: Copy the root cert to the host
+      when: deploy_pki
       ansible.builtin.copy:
         src: "{{ root_ca_cert_file_path }}"
         dest: "/etc/pki/ca-trust/source/anchors/internal-root-ca.pem"
@@ -348,7 +350,7 @@
         dest: "/opt/dropbox/root-ca.pem"
 
     - name: Copy the root cert to the web dropbox in crt format
-      when: "{{ 'haproxy-ingress' in enabled_services }}"
+      when: "{{ 'haproxy-ingress' in enabled_services }} and deploy_pki"
       ansible.builtin.copy:
         src: "{{ root_ca_cert_file_path }}"
         dest: "/opt/dropbox/root-ca.crt"
@@ -363,7 +365,7 @@
         dest: "{{ service_containers_dir }}/scanner-app/volumes/config/frontend-connection.js"
 
     - name: Copy the wildcard certificate to the host
-      when: "{{ 'haproxy-ingress' in enabled_services }}"
+      when: "{{ 'haproxy-ingress' in enabled_services }} and deploy_pki"
       ansible.builtin.copy:
         src: "{{ wildcard_cert_file_path }}"
         dest: "{{ service_containers_dir }}/shared/volumes/certs/haproxy_wildcard.pem"
