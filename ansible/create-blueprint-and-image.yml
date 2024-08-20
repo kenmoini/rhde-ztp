@@ -43,6 +43,7 @@
     #ostree_image_ref: rhel/8/x86_64/edge
     ostree_image_ref: rhel/9/x86_64/edge
 
+    enable_fdo: false
     fdo_manufacturing_server_url:  "http://192.168.99.10:8080"
 
     packages:
