@@ -9,9 +9,11 @@ distro = "{{ image_distro }}"
 [customizations]
 installation_device = "{{ installation_device | default('/dev/sda') }}"
 
+{% if enable_fdo %}
 [customizations.fdo]
 manufacturing_server_url = "{{ fdo_manufacturing_server_url }}"
 diun_pub_key_insecure = "true"
+{% endif %}
 
 {% for user in extra_users %}
 [[customizations.user]]
