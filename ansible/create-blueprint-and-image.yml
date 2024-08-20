@@ -13,9 +13,9 @@
     site_config_name: minimal-rhel94
     site_config_path: "{{ playbook_dir }}/site-configs/rhde-images"
 
-    create_blueprints: true
-    create_image: true
-    extract_image: true
+    create_blueprints: false
+    create_image: false
+    extract_image: false
     #image_name: "rhde-si-image"
     #blueprint_file: si-fdo-blueprint.toml
     #compose_type: edge-simplified-installer
@@ -29,7 +29,7 @@
     #image_distro: rhel-810
     image_name: "minimal-rhel94-image"
     image_distro: rhel-94
-    blueprint_file: minimal-blueprint.toml
+    blueprint_file: "{{ image_name }}.toml"
     #compose_type: edge-commit
     # compose_type: edge-simplified-installer # allowed customizations: InstallationDevice, FDO, User, Group, FIPS
 
@@ -53,8 +53,8 @@
       - microshift
       - microshift-greenboot
       - microshift-networking
-      - microshift-olm
-      - microshift-olm-release-info
+      #- microshift-olm
+      #- microshift-olm-release-info
       - microshift-release-info
       - microshift-selinux
       - selinux-policy
