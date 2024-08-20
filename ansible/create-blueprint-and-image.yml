@@ -30,7 +30,7 @@
     image_name: "minimal-rhel94-image"
     image_distro: rhel-94
     blueprint_file: minimal-blueprint.toml
-    compose_type: edge-commit
+    #compose_type: edge-commit
     # compose_type: edge-simplified-installer # allowed customizations: InstallationDevice, FDO, User, Group, FIPS
 
     image_version: "1.0.0"
